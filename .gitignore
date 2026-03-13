@@ -1,0 +1,55 @@
+# ── Python / Backend ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+*.venv
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Logs
+logs/
+*.log
+*.md
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ── Node / Frontend ────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+.pnp
+.pnp.js
+
+# ── OS / Editor ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Docker ─────────────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ── Misc ───────────────────────────────────────────────────────────
+*.bak
+*.tmp

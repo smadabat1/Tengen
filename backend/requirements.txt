@@ -1,0 +1,11 @@
+fastapi==0.111.0
+uvicorn==0.29.0
+sqlalchemy==2.0.30
+argon2-cffi==23.1.0
+cryptography==42.0.7
+python-jose[cryptography]==3.3.0
+python-multipart==0.0.9
+httpx==0.27.0
+zxcvbn==4.4.28
+pydantic==2.7.1
+pydantic-settings==2.2.1

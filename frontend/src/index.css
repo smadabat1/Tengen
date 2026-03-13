@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Default theme vars (Obsidian) — overridden by applyTheme() */
+:root {
+  --background: 0 0% 4%;
+  --foreground: 0 0% 95%;
+  --card: 0 0% 7%;
+  --card-foreground: 0 0% 95%;
+  --popover: 0 0% 6%;
+  --popover-foreground: 0 0% 95%;
+  --primary: 43 74% 51%;
+  --primary-foreground: 0 0% 5%;
+  --secondary: 0 0% 12%;
+  --secondary-foreground: 0 0% 80%;
+  --muted: 0 0% 10%;
+  --muted-foreground: 0 0% 50%;
+  --accent: 43 74% 51%;
+  --accent-foreground: 0 0% 5%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 14%;
+  --input: 0 0% 12%;
+  --ring: 43 74% 51%;
+  --radius: 0.625rem;
+  --font-heading: "Playfair Display";
+  --font-body: "Inter";
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Subtle dot-grid texture */
+    background-image: radial-gradient(circle, hsl(var(--border) / 0.4) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-heading), serif;
+  }
+
+  /* Custom scrollbar — minimal luxury */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: hsl(var(--card) / 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(43 90% 70%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glowing primary accent border */
+  .glow-border {
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.3), 0 0 12px hsl(var(--primary) / 0.15);
+  }
+
+  /* Card with ambient glow on hover */
+  .card-glow {
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .card-glow:hover {
+    box-shadow: 0 4px 24px hsl(var(--primary) / 0.08), 0 1px 4px hsl(0 0% 0% / 0.4);
+  }
+
+  /* Top accent stripe */
+  .accent-stripe {
+    background: linear-gradient(90deg,
+      transparent 0%,
+      hsl(var(--primary) / 0.6) 30%,
+      hsl(43 90% 70% / 0.8) 50%,
+      hsl(var(--primary) / 0.6) 70%,
+      transparent 100%
+    );
+  }
+}
+
