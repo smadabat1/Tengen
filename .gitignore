@@ -22,7 +22,6 @@ data/
 # Logs
 logs/
 *.log
-*.md
 
 # Environment / secrets
 .env
