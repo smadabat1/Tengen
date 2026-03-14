@@ -33,17 +33,28 @@ export function timeAgo(dateStr) {
 export function extractDomain(url) {
   if (!url) return null
   try {
-    return new URL(url).hostname
+    const trimmed = String(url).trim()
+    if (!trimmed) return null
+    const hasScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(trimmed)
+    const normalized = hasScheme ? trimmed : `https://${trimmed}`
+    return new URL(normalized).hostname
   } catch {
     return null
   }
 }
 
 /** Get favicon URL from domain */
-export function getFaviconUrl(url) {
-  const domain = extractDomain(url)
+export function getFaviconUrl(url, size = 64) {
+  if (!url) return null
+  const trimmed = String(url).trim()
+  if (!trimmed) return null
+
+  const hasScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(trimmed)
+  const normalized = hasScheme ? trimmed : `https://${trimmed}`
+  const domain = extractDomain(normalized)
   if (!domain) return null
-  return `https://www.google.com/s2/favicons?sz=32&domain=${domain}`
+
+  return `https://www.google.com/s2/favicons?sz=${encodeURIComponent(size)}&domain_url=${encodeURIComponent(normalized)}`
 }
 
 /** Strength score → label */
