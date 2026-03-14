@@ -22,7 +22,7 @@ MODES = {
     'docker': {
         'data_dir': '/app/data',
         'log_dir': '/app/logs',
-        'default_host': '0.0.0.0',
+        'default_host': '0.0.0.0', # nosec B104 - required for container deployment
     },
 }
 

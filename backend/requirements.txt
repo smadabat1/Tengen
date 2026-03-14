@@ -1,11 +1,12 @@
-fastapi==0.111.0
+fastapi>=0.111.0
 uvicorn==0.29.0
 sqlalchemy==2.0.30
 argon2-cffi==23.1.0
-cryptography==42.0.7
-python-jose[cryptography]==3.3.0
-python-multipart==0.0.9
+cryptography>=46.0.5 # Fixes CVE-2024-12797, CVE-2026-26007, GHSA-h4gh-qq45-vh27
+python-multipart>=0.0.22 # Fixes CVE-2024-53981, CVE-2026-24486, 
 httpx==0.27.0
 zxcvbn==4.4.28
 pydantic==2.7.1
 pydantic-settings==2.2.1
+starlette>=0.52.1 # Fixes CVE-2024-47874, CVE-2025-54121
+PyJWT>=2.12.1 # Remove python-jose and added PyJWT.

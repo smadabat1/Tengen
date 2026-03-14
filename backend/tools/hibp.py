@@ -39,7 +39,9 @@ class HIBPClient:
         Uses k-anonymity: sends only the first 5 chars of the SHA1 hash.
         Returns True if the password is pwned, False if clean or unreachable.
         """
-        sha1 = hashlib.sha1(password.encode("utf-8")).hexdigest().upper()
+
+        # SHA1 required by HIBP k-anonymity API — not used for password storage
+        sha1 = hashlib.sha1(password.encode("utf-8"), usedforsecurity=False).hexdigest().upper() # noqa: B324
         prefix, suffix = sha1[:5], sha1[5:]
 
         try:

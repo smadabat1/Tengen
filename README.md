@@ -10,6 +10,9 @@
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-6366f1.svg)](LICENSE) [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?logo=fastapi)](https://fastapi.tiangolo.com) [![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](https://react.dev) [![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker)](https://docs.docker.com/compose/)
 
+![Gitleaks](https://github.com/smadabat1/Tengen/actions/workflows/gitleaks.yml/badge.svg) ![Bandit](https://github.com/smadabat1/Tengen/actions/workflows/bandit.yml/badge.svg) ![pip-audit](https://github.com/smadabat1/Tengen/actions/workflows/pipaudit.yml/badge.svg)
+
+
 [Features](#features) · [Quick Start](#quick-start) · [Architecture](#architecture) · [API](#api-reference) · [Roadmap](roadmap.md) · [Changelog](CHANGELOG.md)
 
 </div>
@@ -43,6 +46,29 @@ All vault entries are encrypted with **AES-256-GCM** before they touch the datab
 | **Session security** | Auto-lock on inactivity · logout clears in-memory key · session tokens in `sessionStorage` only |
 | **Themes** | Light / Dark / System — persisted per user |
 | **Self-hosted** | Single `docker-compose up` · no telemetry · no external dependencies except HIBP |
+
+---
+
+## Preview
+
+<p align="center">
+  <img src="docs/images/login.png" alt="Tengen Login" width="800" />
+</p>
+
+<p align="center">
+  <img src="docs/images/vault-cards.png" alt="Vault Cards view" width="48%" />
+  <img src="docs/images/vault-table.png" alt="Vault Table view" width="48%" />
+</p>
+
+<p align="center">
+  <img src="docs/images/analyse.png" alt="Vault Analyse" width="48%" />
+  <img src="docs/images/health.png" alt="Vault health" width="48%" />
+</p>
+
+<p align="center">
+  <img src="docs/images/password-generator.png" alt="Password generator" width="48%" />
+  <img src="docs/images/settings.png" alt="Vault settings" width="48%" />
+</p>
 
 ---
 
