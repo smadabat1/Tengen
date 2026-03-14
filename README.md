@@ -10,7 +10,7 @@
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-6366f1.svg)](LICENSE) [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?logo=fastapi)](https://fastapi.tiangolo.com) [![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](https://react.dev) [![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker)](https://docs.docker.com/compose/)
 
-[Features](#features) · [Quick Start](#quick-start) · [Architecture](#architecture) · [API](#api-reference) · [Roadmap](#roadmap) · [Changelog](#changelog)
+[Features](#features) · [Quick Start](#quick-start) · [Architecture](#architecture) · [API](#api-reference) · [Roadmap](roadmap.md) · [Changelog](CHANGELOG.md)
 
 </div>
 
@@ -233,90 +233,10 @@ Set `VITE_API_BASE_URL=http://localhost:8000` if the backend is running locally.
 
 ---
 
-## Roadmap
+## Roadmap / Changelog
 
-> Even Tengen evolves. He just takes a few hundred years about it. We'll be faster.
-
-### 🔜 v1.1 — Usability
-- [ ] Pagination on vault table (currently loads all entries)
-- [ ] Bulk actions — delete multiple, bulk HIBP scan
-- [ ] Entry duplication
-- [ ] Keyboard shortcuts (J/K navigation, E to edit, D to delete)
-- [ ] Vault export (encrypted JSON) and import from CSV / Bitwarden / 1Password
-
-### 🔜 v1.2 — Security Hardening
-- [ ] TOTP two-factor authentication
-- [ ] Configurable session timeout in UI settings
-- [ ] Audit log — record login, create, update, delete events
-- [ ] Argon2id parameter upgrade prompt on login
-- [ ] HTTPS enforcement + HSTS header
-
-### 🔜 v1.3 — Multi-user / Teams
-- [ ] Role-based access (admin vs. user)
-- [ ] Shared vaults (read-only and read-write)
-- [ ] User invite flow
-- [ ] Admin dashboard
-
-### 🔜 v1.4 — Integrations
-- [ ] Browser extension (Chrome, Firefox)
-- [ ] CLI client (`tengen get <title>` — because sometimes you just want to feel cool in a terminal)
-- [ ] REST API key for scripting (separate from session JWT)
-- [ ] WebDAV / S3 backup target for SQLite database
-
-### 💭 Future / Considering
-- [ ] Mobile app (React Native — Android first, iOS when we stop crying about Xcode)
-- [ ] Offline-first PWA mode
-- [ ] Password history per entry
-- [ ] Custom fields per entry (recovery codes, security questions, secrets you shouldn't have told anyone)
-- [ ] Third-party security audit
-
----
-
-## Changelog
-
-### v1.0.0 — Initial Release
-`Coming Soon`
-
-> The barrier is up. First public release of Tengen. Built for personal use, open sourced for everyone.
-
-#### Core vault
-- AES-256-GCM encryption for all sensitive fields (password, username, notes)
-- PBKDF2 key derivation from master password · Argon2id authentication hash
-- Full CRUD for vault entries with title, URL, username, password, notes, tags
-- Inline search bar filtering by title and URL
-- Tag-based filtering via sidebar and command palette
-- Sort by date added, last updated, or title (asc/desc)
-- Grid (card) view and table view with live toggle
-
-#### Security
-- k-anonymity HIBP integration — SHA-1 prefix only, suffix compared locally, full password never leaves your machine
-- Async background HIBP check on every entry create/update
-- Manual on-demand HIBP check per entry
-- Batch HIBP scan across all vault entries with live progress feed
-- zxcvbn password strength scoring on entry create/edit
-- Auto-lock on configurable inactivity timeout
-- Session encryption key lives only in server-side in-memory TTL cache
-
-#### Health & analytics
-- Vault health score (0–100) based on weak/pwned/reused/old password counts
-- Score history and area chart timeline — stored in DB, not localStorage
-- HIBP batch scan run history — stored in DB, not localStorage
-
-#### UX
-- `Cmd/Ctrl+K` command palette — search entries, jump to tags, navigate pages
-- Password generator with length slider and charset toggles
-- Breach Analysis page with live per-entry scan results and run history
-- Theme picker — Light / Dark / System
-- Framer Motion page transitions and micro-animations
-
-#### Infrastructure
-- FastAPI + Uvicorn backend · SQLite in WAL mode
-- React 18 + Vite frontend · TanStack Router with lazy-loaded routes
-- Single `docker-compose up` deployment · multi-stage Dockerfile for frontend
-- Security response headers (CSP, X-Frame-Options, X-Content-Type-Options)
-- Structured request logging with per-request UUID
-
----
+- Roadmap: `roadmap.md`
+- Changelog: `CHANGELOG.md`
 
 ## Contributing
 
