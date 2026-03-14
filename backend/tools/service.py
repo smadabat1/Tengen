@@ -177,7 +177,7 @@ class ToolsService:
     @staticmethod
     def save_health_snapshot(user_id: int, data: HealthSnapshotCreate, db: Session) -> HealthSnapshot:
         """
-        Persist a health snapshot. Skips if last snapshot was within 60 seconds.
+        Persist a health snapshot. Rate-limited to one per 5 minutes per user.
         Trims to the most recent 30 snapshots per user.
         """
         last = (
@@ -187,8 +187,11 @@ class ToolsService:
             .first()
         )
         if last:
-            age = (datetime.utcnow() - last.created_at).total_seconds()
-            if age < 60:
+            last_ts = last.created_at
+            if last_ts.tzinfo is None:
+                last_ts = last_ts.replace(tzinfo=timezone.utc)
+            age = (datetime.now(timezone.utc) - last_ts).total_seconds()
+            if age < 300:
                 return last
 
         snap = HealthSnapshot(user_id=user_id, **data.model_dump())
@@ -262,5 +265,3 @@ class ToolsService:
             .order_by(desc(HibpRun.created_at))
             .all()
         )
-
-

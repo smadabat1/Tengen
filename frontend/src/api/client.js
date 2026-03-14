@@ -25,7 +25,11 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status
+    const requestUrl = error.config?.url || ''
+    const isLoginRequest = requestUrl.includes('/auth/login')
+
+    if (status === 401 && !isLoginRequest) {
       // Clear session and redirect to login
       sessionStorage.removeItem('tengen_token')
       // Dynamically import to avoid circular deps

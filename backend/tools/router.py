@@ -87,7 +87,7 @@ async def save_health_snapshot(
     auth: tuple = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Persist a health snapshot. Deduplicates within 60 seconds."""
+    """Persist a health snapshot. Rate-limited to one per 5 minutes per user."""
     user, _ = auth
     return ToolsService.save_health_snapshot(user.id, body, db)
 
