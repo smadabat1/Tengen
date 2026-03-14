@@ -1,0 +1,77 @@
+name: Semgrep SAST Scan
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: "0 8 * * *" # daily at 8 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+
+    # Skip PRs created by dependabot to avoid permission issues
+    if: github.actor != 'dependabot[bot]'
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      # --- SARIF report for GitHub Security tab ---
+      - name: Run Semgrep (SARIF)
+        run: |
+          semgrep scan \
+            --config auto \
+            --sarif \
+            --output semgrep-sarif.json \
+            --exclude "node_modules" \
+            --exclude "*.min.js" \
+            --exclude "dist" \
+            --exclude "build" \
+            --exclude ".venv" \
+            --exclude "venv" \
+            || true
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: semgrep-sarif.json
+          category: semgrep
+
+      # --- Human readable summary in Actions UI ---
+      - name: Run Semgrep (summary)
+        run: |
+          echo "## Semgrep SAST Scan Results" >> $GITHUB_STEP_SUMMARY
+          semgrep scan \
+            --config auto \
+            --exclude "node_modules" \
+            --exclude "dist" \
+            --exclude "build" \
+            --exclude ".venv" \
+            --exclude "venv" \
+            >> $GITHUB_STEP_SUMMARY 2>&1 || true
+
+      # --- Fail on high severity findings ---
+      - name: Fail on high severity findings
+        run: |
+          semgrep scan \
+            --config auto \
+            --severity ERROR \
+            --exclude "node_modules" \
+            --exclude "dist" \
+            --exclude "build" \
+            --exclude ".venv" \
+            --exclude "venv"
