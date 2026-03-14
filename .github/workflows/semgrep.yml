@@ -18,8 +18,6 @@ jobs:
   semgrep:
     name: Semgrep SAST
     runs-on: ubuntu-latest
-    container:
-      image: semgrep/semgrep # official semgrep docker image, no install needed
 
     # Skip PRs created by dependabot to avoid permission issues
     if: github.actor != 'dependabot[bot]'
@@ -27,6 +25,9 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
+      - name: Install Semgrep
+        run: pip install semgrep
 
       # --- SARIF report for GitHub Security tab ---
       - name: Run Semgrep (SARIF)
