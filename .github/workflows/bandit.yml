@@ -4,16 +4,20 @@ on:
   push:
     branches: ["**"]
     paths:
-      - "backend/**"   # ← adjust this to your FastAPI folder name
       - "**.py"
   pull_request:
     branches: ["**"]
     paths:
-      - "backend/**"
       - "**.py"
   schedule:
-    - cron: "0 5 * * *" # daily at 5 AM UTC
+    - cron: "0 5 * * *"
   workflow_dispatch:
+
+# Fix for error #3 and #4 — explicitly grant security-events write permission
+permissions:
+  contents: read
+  security-events: write
+  actions: read
 
 jobs:
   bandit:
@@ -32,7 +36,7 @@ jobs:
       - name: Install Bandit
         run: pip install bandit[toml]
 
-      # --- SARIF report (uploads to GitHub Security tab) ---
+      # Fix for error #1 — --exit-zero ensures the file is always created
       - name: Run Bandit (SARIF)
         run: |
           bandit -r . \
@@ -41,15 +45,16 @@ jobs:
             --exclude "./.venv,./venv,./tests,./node_modules" \
             --severity-level medium \
             --confidence-level medium \
-            || true   # don't fail the step, let the SARIF upload do the reporting
+            --exit-zero
 
+      # Fix for error #5 — upgraded to codeql-action@v4
       - name: Upload SARIF to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: bandit-sarif.json
           category: bandit
 
-      # --- Human-readable report saved as artifact ---
+      # Fix for error #2 — --exit-zero ensures the file is always created
       - name: Run Bandit (HTML report)
         run: |
           bandit -r . \
@@ -58,7 +63,7 @@ jobs:
             --exclude "./.venv,./venv,./tests,./node_modules" \
             --severity-level medium \
             --confidence-level medium \
-            || true
+            --exit-zero
 
       - name: Upload HTML report as artifact
         uses: actions/upload-artifact@v4
@@ -68,7 +73,7 @@ jobs:
           path: bandit-report.html
           retention-days: 30
 
-      # --- Fail the build only on HIGH severity findings ---
+      # Fail the build only on HIGH severity findings
       - name: Fail on HIGH severity issues
         run: |
           bandit -r . \
