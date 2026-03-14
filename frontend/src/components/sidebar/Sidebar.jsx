@@ -103,25 +103,27 @@ export function Sidebar({ activeTag, onTagSelect, className }) {
                   exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.18 }}
                   style={{ position: 'fixed', zIndex: 50, top: '50%', left: '50%', x: '-50%', y: '-50%' }}
-                  className="w-full max-w-sm bg-card border border-border rounded-xl shadow-2xl p-6"
+                  className="w-full max-w-sm bg-background border border-border/40 rounded-2xl shadow-2xl p-6"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center mb-4">
-                    <LogOut className="w-5 h-5 text-destructive" />
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-center shrink-0">
+                      <LogOut className="w-5 h-5 text-destructive" />
+                    </div>
+                    <Dialog.Title className="text-xl font-semibold m-0 tracking-tight">Sign out?</Dialog.Title>
                   </div>
-                  <Dialog.Title className="text-base font-semibold mb-1">Sign out?</Dialog.Title>
-                  <p className="text-sm text-muted-foreground mb-6">
+                  <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
                     You'll need to enter your master password again to access your vault.
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <Dialog.Close asChild>
-                      <button className="flex-1 py-2 bg-secondary hover:bg-secondary/80 text-sm font-medium rounded-xl transition-colors">
+                      <button className="flex-1 py-2.5 bg-secondary/60 hover:bg-secondary text-sm font-semibold rounded-lg transition-all">
                         Cancel
                       </button>
                     </Dialog.Close>
                     <button
                       onClick={handleLogout}
                       disabled={loggingOut}
-                      className="flex-1 py-2 bg-destructive text-destructive-foreground text-sm font-medium rounded-xl hover:opacity-90 transition-all disabled:opacity-50"
+                      className="flex-1 py-2.5 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-sm font-semibold rounded-lg transition-all disabled:opacity-50 shadow-sm"
                     >
                       {loggingOut ? 'Signing out…' : 'Sign out'}
                     </button>

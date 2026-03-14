@@ -1,8 +1,7 @@
-import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   AlertTriangle, ShieldAlert, Copy, Clock, Shield,
-  TrendingUp, TrendingDown, Minus,
+  TrendingUp, TrendingDown, Minus, RefreshCw,
 } from 'lucide-react'
 import {
   RadialBarChart, RadialBar, PolarAngleAxis,
@@ -12,6 +11,7 @@ import {
 } from 'recharts'
 import { toolsApi } from '@/api/tools'
 import { vaultApi } from '@/api/vault'
+import { Tooltip as UiTooltip } from '@/components/ui/Tooltip'
 import { cn } from '@/lib/utils'
 
 const HEALTH_CONFIG = [
@@ -64,11 +64,13 @@ function RadarTooltip({ active, payload }) {
 export default function HealthPage() {
   const queryClient = useQueryClient()
 
-  const { data: health, isLoading: healthLoading } = useQuery({
+  const healthQuery = useQuery({
     queryKey: ['health'],
     queryFn: toolsApi.getHealth,
     staleTime: 1000 * 60,
+    refetchOnWindowFocus: false,
   })
+  const { data: health, isLoading: healthLoading, isFetching: healthRefreshing } = healthQuery
 
   const { data: entries = [] } = useQuery({
     queryKey: ['entries', {}],
@@ -88,24 +90,6 @@ export default function HealthPage() {
   const total = health?.total ?? entries.length
   const score = total > 0 ? Math.max(0, Math.round(100 - (totalIssues / total) * 100)) : 100
 
-  const snapshotMutation = useMutation({
-    mutationFn: toolsApi.saveHealthSnapshot,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['health-history'] }),
-  })
-
-  useEffect(() => {
-    if (!health || healthLoading) return
-    snapshotMutation.mutate({
-      score,
-      weak: health.weak,
-      pwned: health.pwned,
-      reused: health.reused,
-      old: health.old,
-      total,
-    })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [health, healthLoading])
-
   const radarData = HEALTH_CONFIG.map(({ key, label }) => ({
     category: label,
     value: total > 0 ? Math.round(((health?.[key] ?? 0) / total) * 100) : 0,
@@ -113,6 +97,33 @@ export default function HealthPage() {
 
   const areaData = history.map((s) => ({ date: formatTsShort(s.created_at), score: s.score }))
   const gaugeData = [{ name: 'score', value: score, fill: scoreColor(score) }]
+  const snapshotMutation = useMutation({
+    mutationFn: toolsApi.saveHealthSnapshot,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['health-history'] }),
+  })
+  const snapshotPending = snapshotMutation.isPending
+
+  const buildSnapshotPayload = (data) => {
+    const totalCount = data?.total ?? 0
+    const totalIssues = HEALTH_CONFIG.reduce((sum, c) => sum + (data?.[c.key] ?? 0), 0)
+    const scoreValue = totalCount > 0
+      ? Math.max(0, Math.round(100 - (totalIssues / totalCount) * 100))
+      : 100
+    return {
+      score: scoreValue,
+      weak: data?.weak ?? 0,
+      pwned: data?.pwned ?? 0,
+      reused: data?.reused ?? 0,
+      old: data?.old ?? 0,
+      total: totalCount,
+    }
+  }
+
+  const handleRefreshSnapshot = async () => {
+    const result = await healthQuery.refetch()
+    if (!result?.data) return
+    snapshotMutation.mutate(buildSnapshotPayload(result.data))
+  }
 
   return (
     <div className="p-6 max-w-screen-xl mx-auto">
@@ -122,12 +133,29 @@ export default function HealthPage() {
           <h2 className="font-heading font-semibold text-lg">Vault Health</h2>
           <p className="text-xs text-muted-foreground mt-0.5">Security overview of your stored passwords</p>
         </div>
-        <span
-          className="text-xs font-semibold px-3 py-1.5 rounded-full border"
-          style={{ color: scoreColor(score), borderColor: scoreColor(score) + '40', background: scoreColor(score) + '15' }}
-        >
-          {scoreLabel(score)}
-        </span>
+        <div className="flex items-center gap-2">
+          <UiTooltip content="You can refresh health once every 5 minutes." side="bottom">
+            <button
+              type="button"
+              onClick={handleRefreshSnapshot}
+              disabled={!health || healthLoading || healthRefreshing || snapshotPending}
+              className={cn(
+                'text-xs font-semibold px-3 py-1.5 rounded-full border flex items-center gap-1.5',
+                'bg-card/60 hover:bg-card transition-colors',
+                'disabled:opacity-50 disabled:cursor-not-allowed'
+              )}
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              {snapshotPending || healthRefreshing ? 'Refreshing…' : 'Refresh Health'}
+            </button>
+          </UiTooltip>
+          <span
+            className="text-xs font-semibold px-3 py-1.5 rounded-full border"
+            style={{ color: scoreColor(score), borderColor: scoreColor(score) + '40', background: scoreColor(score) + '15' }}
+          >
+            {scoreLabel(score)}
+          </span>
+        </div>
       </div>
 
       {/* Main 2-column layout */}

@@ -96,6 +96,7 @@ export function EntryModal({ open, onOpenChange, entry }) {
     mutationFn: (data) => vaultApi.createEntry({ ...data, tags }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entries'] })
+      queryClient.invalidateQueries({ queryKey: ['health'] })
       queryClient.invalidateQueries({ queryKey: ['tags'] })
       toast.success('Entry created')
       onOpenChange(false)
