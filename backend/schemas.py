@@ -1,6 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_serializer, field_validator
+
+
+def _as_utc(dt: datetime | None) -> datetime | None:
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
 
 
 # ---------------------------------------------------------------------------
@@ -79,6 +87,10 @@ class EntryResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    @field_serializer("hibp_checked_at", "created_at", "updated_at", when_used="json")
+    def _serialize_entry_datetimes(self, v: datetime | None) -> datetime | None:
+        return _as_utc(v)
+
     model_config = {"from_attributes": True}
 
 
@@ -122,6 +134,11 @@ class HIBPCheckResponse(BaseModel):
     pwned: bool
     checked_at: datetime
 
+    @field_serializer("checked_at", when_used="json")
+    def _serialize_checked_at(self, v: datetime) -> datetime:
+        # Ensure client gets an ISO timestamp with timezone offset
+        return _as_utc(v)  # type: ignore[return-value]
+
 
 class HealthSummaryResponse(BaseModel):
     total: int
@@ -154,6 +171,10 @@ class HealthSnapshotResponse(BaseModel):
     total: int
     created_at: datetime
 
+    @field_serializer("created_at", when_used="json")
+    def _serialize_created_at(self, v: datetime) -> datetime:
+        return _as_utc(v)  # type: ignore[return-value]
+
     model_config = {"from_attributes": True}
 
 
@@ -177,6 +198,10 @@ class HibpRunResponse(BaseModel):
     pwned: int
     clean: int
     created_at: datetime
+
+    @field_serializer("created_at", when_used="json")
+    def _serialize_created_at(self, v: datetime) -> datetime:
+        return _as_utc(v)  # type: ignore[return-value]
 
     model_config = {"from_attributes": True}
 

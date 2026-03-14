@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import (
     Boolean, Column, DateTime, ForeignKey,
     Integer, String, Text,
@@ -15,7 +15,7 @@ class User(Base):
     auth_hash        = Column(Text, nullable=False)       # Argon2id hash of (password + auth_salt)
     auth_salt        = Column(String(64), nullable=False) # Salt A — used for auth verification
     encryption_salt  = Column(String(64), nullable=False) # Salt B — used for key derivation, never returned to client
-    created_at       = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at       = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     entries          = relationship("Entry",          back_populates="user", cascade="all, delete-orphan")
     health_snapshots = relationship("HealthSnapshot", back_populates="user", cascade="all, delete-orphan")
@@ -50,8 +50,13 @@ class Entry(Base):
     hibp_checked_at    = Column(DateTime, nullable=True)
 
     # Timestamps
-    created_at         = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at         = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at         = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at         = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
 
     user = relationship("User", back_populates="entries")
 
@@ -70,7 +75,7 @@ class HealthSnapshot(Base):
     reused     = Column(Integer, nullable=False, default=0)
     old        = Column(Integer, nullable=False, default=0)
     total      = Column(Integer, nullable=False, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     user = relationship("User", back_populates="health_snapshots")
 
@@ -86,7 +91,7 @@ class HibpRun(Base):
     total      = Column(Integer, nullable=False)
     pwned      = Column(Integer, nullable=False, default=0)
     clean      = Column(Integer, nullable=False, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     user = relationship("User", back_populates="hibp_runs")
 
