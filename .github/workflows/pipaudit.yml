@@ -50,7 +50,7 @@ jobs:
             --requirement backend/requirements.txt \
             --format json \
             --output pip-audit-report.json \
-            --exit-zero  # don't fail here, let the summary step do it
+            || true  # don't fail here, let the summary step do it
 
       - name: Upload JSON report as artifact
         uses: actions/upload-artifact@v4
