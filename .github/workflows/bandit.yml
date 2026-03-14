@@ -1,0 +1,77 @@
+name: Bandit Python Security Scan
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "backend/**"   # ← adjust this to your FastAPI folder name
+      - "**.py"
+  pull_request:
+    branches: ["**"]
+    paths:
+      - "backend/**"
+      - "**.py"
+  schedule:
+    - cron: "0 5 * * *" # daily at 5 AM UTC
+  workflow_dispatch:
+
+jobs:
+  bandit:
+    name: Bandit SAST Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Bandit
+        run: pip install bandit[toml]
+
+      # --- SARIF report (uploads to GitHub Security tab) ---
+      - name: Run Bandit (SARIF)
+        run: |
+          bandit -r . \
+            -f sarif \
+            -o bandit-sarif.json \
+            --exclude "./.venv,./venv,./tests,./node_modules" \
+            --severity-level medium \
+            --confidence-level medium \
+            || true   # don't fail the step, let the SARIF upload do the reporting
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: bandit-sarif.json
+          category: bandit
+
+      # --- Human-readable report saved as artifact ---
+      - name: Run Bandit (HTML report)
+        run: |
+          bandit -r . \
+            -f html \
+            -o bandit-report.html \
+            --exclude "./.venv,./venv,./tests,./node_modules" \
+            --severity-level medium \
+            --confidence-level medium \
+            || true
+
+      - name: Upload HTML report as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-report-${{ github.run_number }}
+          path: bandit-report.html
+          retention-days: 30
+
+      # --- Fail the build only on HIGH severity findings ---
+      - name: Fail on HIGH severity issues
+        run: |
+          bandit -r . \
+            --exclude "./.venv,./venv,./tests,./node_modules" \
+            --severity-level high \
+            --confidence-level high
