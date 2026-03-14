@@ -94,7 +94,7 @@ jobs:
             --rule 'security/detect-eval-with-expression: error' \
             --rule 'security/detect-pseudoRandomBytes: error' \
             --rule 'security/detect-disable-mustache-escape: error' \
-            --ignore-path .gitignore \
+            --ignore-path ../.gitignore \
             --format stylish \
             >> $GITHUB_STEP_SUMMARY 2>&1 || true
 
@@ -110,4 +110,4 @@ jobs:
             --rule 'security/detect-eval-with-expression: error' \
             --rule 'security/detect-pseudoRandomBytes: error' \
             --rule 'security/detect-disable-mustache-escape: error' \
-            --ignore-path .gitignore
+            --ignore-path ../.gitignore
