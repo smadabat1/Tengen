@@ -34,7 +34,7 @@ All vault entries are encrypted with **AES-256-GCM** before they touch the datab
 |---|---|
 | **Vault** | Create, read, update, delete password entries · username, password, URL, notes, tags |
 | **Encryption** | AES-256-GCM per entry · fresh random 96-bit IV per write · ciphertext never leaves server |
-| **Key derivation** | Master password → PBKDF2 (SHA-256) → 256-bit key · Argon2id for authentication hash |
+| **Key derivation** | Argon2id (raw mode) for both authentication hash and AES-256 encryption key derivation — memory-hard, GPU-resistant |
 | **Breach detection** | HaveIBeenPwned k-anonymity check · only SHA-1 prefix sent, never the full password · auto-checked on create/update · manual on-demand · batch scan all entries |
 | **Password health** | zxcvbn strength scoring · vault-wide health dashboard · score history with area chart · tracks weak / pwned / reused / old passwords |
 | **Password generator** | Cryptographically random · configurable length, charset, symbols |
@@ -130,10 +130,9 @@ All configuration is done via environment variables in `.env`.
 ### Security model
 
 1. **At rest** — every entry's password, username, and notes are AES-256-GCM encrypted. The encryption key is never written to disk. Ever.
-2. **In transit** — plaintext passwords travel over HTTPS. TLS termination is your responsibility — use a reverse proxy like Caddy or Nginx with Let's Encrypt. Don't skip this.
-3. **Authentication** — master passwords are hashed with Argon2id, the current gold standard for password hashing. Not bcrypt. Not MD5. Please not MD5.
-4. **Key lifecycle** — on login, the server derives your encryption key from the master password + stored salt, holds it in a TTL session cache, and purges it on logout or expiry. It never touches a database row.
-5. **HIBP privacy** — only the first 5 hex characters of `SHA1(password)` are sent to HaveIBeenPwned. The full hash and plaintext never leave your machine. This is called k-anonymity and it's clever.
+2. **Authentication** — master passwords are hashed with Argon2id, the current gold standard for password hashing. Not bcrypt. Not MD5. Please not MD5.
+3. **Key derivation & lifecycle** — Argon2id raw mode derives the 256-bit AES key from master password + stored salt on login (same algorithm used for the auth hash, same tunable env params). The key is never stored — it lives only in a TTL session cache and is purged on logout or expiry.
+4. **HIBP privacy** — only the first 5 hex characters of `SHA1(password)` are sent to HaveIBeenPwned. The full hash and plaintext never leave your machine. This is called k-anonymity and it's clever.
 
 ---
 
