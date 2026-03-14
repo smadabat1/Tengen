@@ -13,7 +13,6 @@ on:
     - cron: "0 5 * * *"
   workflow_dispatch:
 
-# Fix for error #3 and #4 — explicitly grant security-events write permission
 permissions:
   contents: read
   security-events: write
@@ -36,7 +35,6 @@ jobs:
       - name: Install Bandit
         run: pip install bandit[toml] bandit-sarif-formatter
 
-      # Fix for error #1 — --exit-zero ensures the file is always created
       - name: Run Bandit (SARIF)
         run: |
           bandit -r . \
@@ -47,14 +45,12 @@ jobs:
             --confidence-level medium \
             --exit-zero
 
-      # Fix for error #5 — upgraded to codeql-action@v4
       - name: Upload SARIF to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: bandit-sarif.json
           category: bandit
 
-      # Fix for error #2 — --exit-zero ensures the file is always created
       - name: Run Bandit (HTML report)
         run: |
           bandit -r . \

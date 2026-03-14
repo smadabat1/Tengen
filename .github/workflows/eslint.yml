@@ -1,0 +1,114 @@
+name: ESLint Security Scan
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "frontend/**"
+      - "**.js"
+      - "**.jsx"
+      - "**.ts"
+      - "**.tsx"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "frontend/**"
+      - "**.js"
+      - "**.jsx"
+      - "**.ts"
+      - "**.tsx"
+  schedule:
+    - cron: "0 7 * * *" # daily at 7 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  eslint:
+    name: ESLint Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install security plugins
+        working-directory: frontend
+        run: npm install --save-dev eslint-plugin-security eslint-plugin-react eslint-formatter-sarif
+
+      # --- SARIF report for GitHub Security tab ---
+      - name: Run ESLint (SARIF)
+        working-directory: frontend
+        run: |
+          npx eslint . \
+            --ext .js,.jsx,.ts,.tsx \
+            --format @microsoft/eslint-formatter-sarif \
+            --output-file ../eslint-sarif.json \
+            --no-eslintrc \
+            --plugin security \
+            --rule 'security/detect-object-injection: warn' \
+            --rule 'security/detect-non-literal-regexp: warn' \
+            --rule 'security/detect-unsafe-regex: error' \
+            --rule 'security/detect-buffer-noassert: error' \
+            --rule 'security/detect-child-process: error' \
+            --rule 'security/detect-disable-mustache-escape: error' \
+            --rule 'security/detect-eval-with-expression: error' \
+            --rule 'security/detect-new-buffer: error' \
+            --rule 'security/detect-no-csrf-before-method-override: error' \
+            --rule 'security/detect-possible-timing-attacks: warn' \
+            --rule 'security/detect-pseudoRandomBytes: error' \
+            --ignore-path .gitignore \
+            || true
+        continue-on-error: true
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: eslint-sarif.json
+          category: eslint-security
+
+      # --- Human readable output in Actions summary ---
+      - name: Run ESLint (summary)
+        working-directory: frontend
+        run: |
+          echo "## ESLint Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          npx eslint . \
+            --ext .js,.jsx,.ts,.tsx \
+            --no-eslintrc \
+            --plugin security \
+            --rule 'security/detect-unsafe-regex: error' \
+            --rule 'security/detect-eval-with-expression: error' \
+            --rule 'security/detect-pseudoRandomBytes: error' \
+            --rule 'security/detect-disable-mustache-escape: error' \
+            --ignore-path .gitignore \
+            --format stylish \
+            >> $GITHUB_STEP_SUMMARY 2>&1 || true
+
+      # --- Fail on error-level findings ---
+      - name: Fail on errors
+        working-directory: frontend
+        run: |
+          npx eslint . \
+            --ext .js,.jsx,.ts,.tsx \
+            --no-eslintrc \
+            --plugin security \
+            --rule 'security/detect-unsafe-regex: error' \
+            --rule 'security/detect-eval-with-expression: error' \
+            --rule 'security/detect-pseudoRandomBytes: error' \
+            --rule 'security/detect-disable-mustache-escape: error' \
+            --ignore-path .gitignore
