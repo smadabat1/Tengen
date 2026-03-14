@@ -2,11 +2,11 @@ name: Bandit Python Security Scan
 
 on:
   push:
-    branches: ["**"]
+    branches: ["main"]
     paths:
       - "**.py"
   pull_request:
-    branches: ["**"]
+    branches: ["main"]
     paths:
       - "**.py"
   schedule:
@@ -34,7 +34,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install Bandit
-        run: pip install bandit[toml]
+        run: pip install bandit[toml] bandit-sarif-formatter
 
       # Fix for error #1 — --exit-zero ensures the file is always created
       - name: Run Bandit (SARIF)
