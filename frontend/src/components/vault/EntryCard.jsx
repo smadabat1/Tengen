@@ -5,7 +5,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useClipboard } from '@/hooks/useClipboard'
 import { toolsApi } from '@/api/tools'
-import { STRENGTH_LABELS, STRENGTH_COLORS, STRENGTH_BG, getFaviconUrl, timeAgo, cn } from '@/lib/utils'
+import { STRENGTH_LABELS, STRENGTH_COLORS, STRENGTH_BG, timeAgo, cn } from '@/lib/utils'
+import { EntryFavicon } from '@/components/vault/EntryFavicon'
 
 /**
  * EntryCard — displays a single vault entry.
@@ -19,7 +20,6 @@ export function EntryCard({ entry, onEdit, onDelete }) {
   const [checkingHibp, setCheckingHibp] = useState(false)
   const { copy, copied } = useClipboard()
   const queryClient = useQueryClient()
-  const faviconUrl = getFaviconUrl(entry.url)
 
   const handleHibpCheck = async () => {
     if (checkingHibp) return
@@ -52,18 +52,7 @@ export function EntryCard({ entry, onEdit, onDelete }) {
       <div className="flex items-center gap-3 mb-3">
         {/* Favicon / initial */}
         <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
-          {faviconUrl ? (
-            <img
-              src={faviconUrl}
-              alt=""
-              className="w-5 h-5 object-contain"
-              onError={(e) => { e.target.style.display = 'none' }}
-            />
-          ) : (
-            <span className="text-sm font-semibold text-primary uppercase">
-              {entry.title[0] ?? "E"}
-            </span>
-          )}
+          <EntryFavicon url={entry.url} title={entry.title} size={20} />
         </div>
 
         {/* Title + URL */}

@@ -5,7 +5,8 @@ import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import { useClipboard } from '@/hooks/useClipboard'
 import { toolsApi } from '@/api/tools'
-import { STRENGTH_LABELS, STRENGTH_COLORS, STRENGTH_BG, getFaviconUrl, timeAgo, cn } from '@/lib/utils'
+import { STRENGTH_LABELS, STRENGTH_COLORS, STRENGTH_BG, timeAgo, cn } from '@/lib/utils'
+import { EntryFavicon } from '@/components/vault/EntryFavicon'
 
 const COLS = ['', 'Title', 'Username', 'Password', 'Tags', 'Strength', 'HIBP', 'Updated', '']
 
@@ -14,7 +15,6 @@ function TableRow({ entry, onEdit, onDelete }) {
   const [checkingHibp, setCheckingHibp] = useState(false)
   const { copy, copied } = useClipboard()
   const queryClient = useQueryClient()
-  const faviconUrl = getFaviconUrl(entry.url)
 
   const strength = entry.strength_score
   const strengthLabel = strength != null ? STRENGTH_LABELS[strength] : null
@@ -40,16 +40,7 @@ function TableRow({ entry, onEdit, onDelete }) {
       {/* Icon */}
       <td className="py-2.5 pl-3 pr-2 w-10">
         <div className="w-7 h-7 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
-          {faviconUrl ? (
-            <img
-              src={faviconUrl}
-              alt=""
-              className="w-4 h-4 object-contain"
-              onError={(e) => { e.target.style.display = 'none' }}
-            />
-          ) : (
-            <span className="text-[10px] font-bold text-primary uppercase">{entry.title[0]}</span>
-          )}
+          <EntryFavicon url={entry.url} title={entry.title} size={16} loading="lazy" textClassName="text-[10px] font-bold" />
         </div>
       </td>
 
