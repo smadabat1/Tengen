@@ -1,0 +1,31 @@
+name: Gitleaks Secret Scan
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  schedule:
+    - cron: "0 4 * * *" # runs daily at 4 AM UTC
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  scan:
+    name: Gitleaks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # IMPORTANT: scan entire git history, not just latest commit
+
+      - name: Run Gitleaks
+        id: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}  # only needed for org repos
+          GITLEAKS_ENABLE_COMMENTS: true        # posts comment on PRs if leak found
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true # uploads SARIF report as artifact
+          GITLEAKS_ENABLE_SUMMARY: true         # shows summary in Actions UI
