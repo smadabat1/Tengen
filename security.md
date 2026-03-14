@@ -15,6 +15,32 @@ We only patch the latest release. If you're running an old version, update first
 
 ---
 
+This project uses automated security scanning via GitHub Actions on every push and pull request to `main`.
+
+## Security Workflows
+
+| Workflow | Tool | What it scans | Status |
+|---|---|---|---|
+| Secret Scanning | [Gitleaks](https://github.com/gitleaks/gitleaks) | Hardcoded secrets & API keys in git history | ![Gitleaks](https://github.com/smadabat1/Tengen/actions/workflows/gitleaks.yml/badge.svg) |
+| Python SAST | [Bandit](https://github.com/PyCQA/bandit) | Security issues in FastAPI/Python code | ![Bandit](https://github.com/smadabat1/Tengen/actions/workflows/bandit.yml/badge.svg) |
+| Dependency CVEs | [pip-audit](https://github.com/pypa/pip-audit) | Known CVEs in Python dependencies | ![pip-audit](https://github.com/smadabat1/Tengen/actions/workflows/pipaudit.yml/badge.svg) |
+
+## What gets checked
+
+**Gitleaks** scans the entire git history for accidentally committed secrets — API keys, passwords, tokens, and other sensitive data.
+
+**Bandit** performs static analysis on the FastAPI backend looking for common Python security issues like weak cryptography, SQL injection patterns, hardcoded credentials, and insecure function usage.
+
+**pip-audit** checks all Python dependencies in `requirements.txt` against the [OSV vulnerability database](https://osv.dev) and fails the build if any known CVEs are found.
+
+## Viewing Results
+
+- Scan results are available under the **Security** tab → **Code scanning alerts** in this repository
+- Detailed reports are saved as artifacts in each workflow run under the **Actions** tab
+- pip-audit results are shown inline in the Actions run summary
+
+---
+
 ## Reporting a Vulnerability
 
 **Please do not open a public GitHub issue for security vulnerabilities.**
