@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, VerificationError, InvalidHashError
 from argon2.low_level import hash_secret_raw, Type
-from jose import JWTError, jwt
+import jwt
 
 from core.config import get_settings
 from core.logger import get_logger
@@ -119,6 +119,6 @@ class SecurityService:
         """
         Decode and validate a JWT.
         Returns the payload dict.
-        Raises JWTError (from python-jose) on any validation failure.
+        Raises InvalidTokenError (from python-jose) on any validation failure.
         """
         return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])

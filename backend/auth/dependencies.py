@@ -7,7 +7,7 @@ get_current_user — decodes JWT, retrieves encryption key from session cache,
 
 from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import JWTError
+from jwt.exceptions import InvalidTokenError
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -43,7 +43,7 @@ async def get_current_user(
     # 1. Decode and validate JWT signature + expiry
     try:
         payload = SecurityService.decode_access_token(token)
-    except JWTError as exc:
+    except InvalidTokenError as exc:
         logger.warning("JWT decode failed: %s", str(exc))
         raise UnauthorizedException("Invalid or expired token")
 
