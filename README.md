@@ -225,8 +225,8 @@ uvicorn main:app --reload --port 8000
 
 ```bash
 cd frontend
-npm install
-npm run dev          # Vite dev server on :5173
+yarn install
+yarn dev          # Vite dev server on :5173
 ```
 
 Set `VITE_API_BASE_URL=http://localhost:8000` if the backend is running locally.

@@ -37,6 +37,7 @@ frontend/build/
 frontend/.vite/
 .pnp
 .pnp.js
+package-lock.json
 
 # ── OS / Editor ────────────────────────────────────────────────────
 .DS_Store
