@@ -25,10 +25,22 @@ export function EntryCard({ entry, onEdit, onDelete }) {
     if (checkingHibp) return
     setCheckingHibp(true)
     try {
-      await toolsApi.hibpCheck(entry.id)
+      let pwned = 0, clean = 0
+      const result = await toolsApi.hibpCheck(entry.id);
+      const status = result?.pwned ? 'pwned' : 'clean';
+      
+      if (status === 'pwned') pwned++
+      else clean++
+
+      //Save the results in history.
+      await toolsApi.saveHibpRun({ total: 1, pwned, clean })
+
       queryClient.invalidateQueries({ queryKey: ['entries'] })
       queryClient.invalidateQueries({ queryKey: ['health'] })
-    } catch {
+      //Refresh the results in history.
+      queryClient.invalidateQueries({ queryKey: ['hibp-runs'] })
+    } catch(error) {
+      console.error(error)
       toast.error('HIBP check failed')
     } finally {
       setCheckingHibp(false)
