@@ -42,7 +42,7 @@ jobs:
             --exclude "build" \
             --exclude ".venv" \
             --exclude "venv" \
-            --exit-zero
+            || true
 
       - name: Upload SARIF to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
@@ -62,7 +62,6 @@ jobs:
             --exclude "build" \
             --exclude ".venv" \
             --exclude "venv" \
-            --exit-zero \
             >> $GITHUB_STEP_SUMMARY 2>&1 || true
 
       # --- Fail on high severity findings ---
