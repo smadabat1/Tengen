@@ -24,6 +24,8 @@ This project uses automated security scanning via GitHub Actions on every push a
 | Secret Scanning | [Gitleaks](https://github.com/gitleaks/gitleaks) | Hardcoded secrets & API keys in git history | ![Gitleaks](https://github.com/smadabat1/Tengen/actions/workflows/gitleaks.yml/badge.svg) |
 | Python SAST | [Bandit](https://github.com/PyCQA/bandit) | Security issues in FastAPI/Python code | ![Bandit](https://github.com/smadabat1/Tengen/actions/workflows/bandit.yml/badge.svg) |
 | Dependency CVEs | [pip-audit](https://github.com/pypa/pip-audit) | Known CVEs in Python dependencies | ![pip-audit](https://github.com/smadabat1/Tengen/actions/workflows/pipaudit.yml/badge.svg) |
+| Full Stack SAST | [Semgrep](https://github.com/semgrep/semgrep) | Security issues in Python, React, Dockerfile, YAML | ![Semgrep](https://github.com/smadabat1/Tengen/actions/workflows/semgrep.yml/badge.svg) |
+
 
 ## What gets checked
 
@@ -33,11 +35,15 @@ This project uses automated security scanning via GitHub Actions on every push a
 
 **pip-audit** checks all Python dependencies in `requirements.txt` against the [OSV vulnerability database](https://osv.dev) and fails the build if any known CVEs are found.
 
+**Semgrep** performs full stack static analysis across Python, JavaScript/TypeScript, 
+Dockerfiles, and YAML using 300+ community rules. Catches issues like running containers 
+as root, insecure JWT usage, XSS patterns, and hardcoded secrets across the entire codebase.
+
 ## Viewing Results
 
-- Scan results are available under the **Security** tab → **Code scanning alerts** in this repository
-- Detailed reports are saved as artifacts in each workflow run under the **Actions** tab
-- pip-audit results are shown inline in the Actions run summary
+- Scan results are available under the **Security** tab → **Code scanning alerts** in this repository (Gitleaks, Bandit, Semgrep)
+- Detailed reports are saved as artifacts in each workflow run under the **Actions** tab (Bandit HTML report, pip-audit JSON report)
+- pip-audit and Semgrep results are shown inline in the Actions run summary
 
 ---
 
