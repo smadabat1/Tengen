@@ -8,15 +8,13 @@
 
 *A self-hosted, end-to-end encrypted password vault.*
 
-<a href="https://www.producthunt.com/products/tengen?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-tengen" target="_blank" rel="noopener noreferrer">
-  <img alt="Tengen - Own your passwords. Own your security. | Product Hunt" width="150" height="50" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1098495&theme=light&t=1773525869161">
-</a>
-
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-6366f1.svg)](LICENSE) [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?logo=fastapi)](https://fastapi.tiangolo.com) [![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](https://react.dev) [![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker)](https://docs.docker.com/compose/)
 
 ![Gitleaks](https://github.com/smadabat1/Tengen/actions/workflows/gitleaks.yml/badge.svg) ![Bandit](https://github.com/smadabat1/Tengen/actions/workflows/bandit.yml/badge.svg) ![pip-audit](https://github.com/smadabat1/Tengen/actions/workflows/pipaudit.yml/badge.svg) ![Semgrep](https://github.com/smadabat1/Tengen/actions/workflows/semgrep.yml/badge.svg)
 
-
+<a href="https://www.producthunt.com/products/tengen?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-tengen" target="_blank" rel="noopener noreferrer">
+  <img alt="Tengen - Own your passwords. Own your security. | Product Hunt" width="150" height="50" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1098495&theme=light&t=1773525869161">
+</a>
 
 [Features](#features) · [Quick Start](#quick-start) · [Architecture](#architecture) · [API](#api-reference) · [Roadmap](roadmap.md) · [Changelog](CHANGELOG.md)
 
