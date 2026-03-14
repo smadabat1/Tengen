@@ -46,6 +46,29 @@ All vault entries are encrypted with **AES-256-GCM** before they touch the datab
 
 ---
 
+## Preview
+
+<p align="center">
+  <img src="docs/images/login.png" alt="Tengen Login" width="800" />
+</p>
+
+<p align="center">
+  <img src="docs/images/vault-cards.png" alt="Vault Cards view" width="48%" />
+  <img src="docs/images/vault-table.png" alt="Vault Table view" width="48%" />
+</p>
+
+<p align="center">
+  <img src="docs/images/analyse.png" alt="Vault Analyse" width="48%" />
+  <img src="docs/images/health.png" alt="Vault health" width="48%" />
+</p>
+
+<p align="center">
+  <img src="docs/images/password-generator.png" alt="Password generator" width="48%" />
+  <img src="docs/images/settings.png" alt="Vault settings" width="48%" />
+</p>
+
+---
+
 ## Quick Start
 
 > Tengen spent 1000 years setting up his barrier. You get 2 minutes.
