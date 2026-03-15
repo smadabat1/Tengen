@@ -2,7 +2,7 @@ import * as RadixSelect from '@radix-ui/react-select'
 import { Check, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export function Select({ value, onValueChange, options = [], placeholder, className }) {
+export function Select({ value, onValueChange, options = [], placeholder, label, className }) {
   const selected = options.find((o) => o.value === value)
 
   return (
@@ -37,6 +37,13 @@ export function Select({ value, onValueChange, options = [], placeholder, classN
           )}
         >
           <RadixSelect.Viewport className="p-1">
+            {label && (
+              <RadixSelect.Group>
+                <RadixSelect.Label className="px-3 pt-1.5 pb-1 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest select-none">
+                  {label}
+                </RadixSelect.Label>
+              </RadixSelect.Group>
+            )}
             {options.map((opt) => (
               <RadixSelect.Item
                 key={opt.value}

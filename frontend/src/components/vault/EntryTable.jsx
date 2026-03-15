@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import { useClipboard } from '@/hooks/useClipboard'
 import { toolsApi } from '@/api/tools'
-import { STRENGTH_LABELS, STRENGTH_COLORS, STRENGTH_BG, timeAgo, cn } from '@/lib/utils'
+import { STRENGTH_LABELS, STRENGTH_COLORS, STRENGTH_BG, timeAgo, cn, getAgeDays, PASSWORD_AGE_THRESHOLD_DAYS } from '@/lib/utils'
 import { EntryFavicon } from '@/components/vault/EntryFavicon'
 import { Tooltip } from '@/components/ui/Tooltip'
 
@@ -21,6 +21,7 @@ function TableRow({ entry, onEdit, onDelete, sharedWith }) {
   const strengthLabel = strength != null ? STRENGTH_LABELS[strength] : null
   const strengthColor = strength != null ? STRENGTH_COLORS[strength] : null
   const strengthBg = strength != null ? STRENGTH_BG[strength] : null
+  const ageDays = getAgeDays(entry.updated_at)
 
   const handleHibpCheck = async () => {
     if (checkingHibp) return
@@ -163,8 +164,8 @@ function TableRow({ entry, onEdit, onDelete, sharedWith }) {
       <td className="py-2.5 pr-4">
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] text-muted-foreground whitespace-nowrap">{timeAgo(entry.updated_at)}</span>
-          {entry.updated_at && (Date.now() - new Date(entry.updated_at).getTime()) > 90 * 24 * 60 * 60 * 1000 && (
-            <Tooltip content="Password not changed in over 90 days" side="top">
+          {ageDays > PASSWORD_AGE_THRESHOLD_DAYS && (
+            <Tooltip content={`Not changed in ${ageDays} days`} side="top">
               <span className="flex items-center gap-0.5 text-[10px] text-orange-500 px-1 py-0.5 rounded bg-orange-500/10 flex-shrink-0 cursor-default">
                 <Clock className="w-2.5 h-2.5" />
                 Outdated
