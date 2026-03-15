@@ -5,7 +5,7 @@ import { EntryCard } from './EntryCard'
 /**
  * EntryGrid — responsive card grid with empty state.
  */
-export function EntryGrid({ entries = [], onEdit, onDelete, isLoading }) {
+export function EntryGrid({ entries = [], onEdit, onDelete, isLoading, duplicateMap }) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -45,6 +45,7 @@ export function EntryGrid({ entries = [], onEdit, onDelete, isLoading }) {
           entry={entry}
           onEdit={onEdit}
           onDelete={onDelete}
+          sharedWith={duplicateMap?.get(entry.password)?.filter(t => t !== entry.title)}
         />
       ))}
     </div>

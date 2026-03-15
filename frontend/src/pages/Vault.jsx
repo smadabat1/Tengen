@@ -62,6 +62,27 @@ export default function VaultPage() {
     staleTime: 1000 * 30,
   })
 
+  // Fetch all entries (no filters) to detect duplicate passwords across the full vault
+  const { data: allEntries = [] } = useQuery({
+    queryKey: ['entries', 'all'],
+    queryFn: () => vaultApi.listEntries({}),
+    staleTime: 1000 * 60,
+  })
+
+  // Map<password, title[]> — only entries where password appears more than once
+  const duplicateMap = useMemo(() => {
+    const map = new Map()
+    for (const e of allEntries) {
+      if (!e.password) continue
+      if (!map.has(e.password)) map.set(e.password, [])
+      map.get(e.password).push(e.title)
+    }
+    for (const [pwd, titles] of map) {
+      if (titles.length < 2) map.delete(pwd)
+    }
+    return map
+  }, [allEntries])
+
   const handleEdit = (entry) => {
     setEditingEntry(entry)
     setEntryModalOpen(true)
@@ -151,6 +172,7 @@ export default function VaultPage() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           isLoading={isLoading}
+          duplicateMap={duplicateMap}
         />
       ) : (
         <EntryTable
@@ -158,6 +180,7 @@ export default function VaultPage() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           isLoading={isLoading}
+          duplicateMap={duplicateMap}
         />
       )}
 
