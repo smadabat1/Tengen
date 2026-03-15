@@ -18,7 +18,7 @@
 - [x] Docker Compose — one command setup
 - [x] Security headers + CSP
 
-## 🔜 v1.1 — Polish & Import
+## 🔜 v1.1 — Polish & Import (Released)
 
 > Making it easier to switch to Tengen and day-to-day use smoother.
 
