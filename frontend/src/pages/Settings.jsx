@@ -1,13 +1,15 @@
 import * as Tabs from '@radix-ui/react-tabs'
-import { Palette, User, Shield } from 'lucide-react'
+import { Palette, User, Shield, Database } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { ThemePicker } from '@/components/ui/ThemePicker'
+import { DataTab } from '@/components/settings/DataTab'
 import { cn } from '@/lib/utils'
 
 const TABS = [
   { value: 'appearance', label: 'Appearance', icon: Palette },
   { value: 'profile',    label: 'Profile',    icon: User    },
   { value: 'security',   label: 'Security',   icon: Shield  },
+  { value: 'data',       label: 'Data',       icon: Database },
 ]
 
 export default function SettingsPage() {
@@ -92,6 +94,11 @@ export default function SettingsPage() {
               Your master password never leaves this device. All vault data is encrypted before being stored.
             </p>
           </div>
+        </Tabs.Content>
+
+        {/* Data */}
+        <Tabs.Content value="data">
+          <DataTab />
         </Tabs.Content>
       </Tabs.Root>
     </div>

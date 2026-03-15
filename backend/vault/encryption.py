@@ -101,6 +101,40 @@ class EncryptionService:
             raise ValueError(f"Decryption failed: {exc}") from exc
 
     @staticmethod
+    def encrypt_blob(plaintext_bytes: bytes, key: bytes) -> tuple[str, str]:
+        """
+        Encrypt an arbitrary byte payload with AES-256-GCM.
+
+        Returns:
+            (iv_b64, ciphertext_b64)
+        """
+        iv = os.urandom(12)
+        ct = AESGCM(key).encrypt(iv, plaintext_bytes, None)
+        return (
+            base64.b64encode(iv).decode("ascii"),
+            base64.b64encode(ct).decode("ascii"),
+        )
+
+    @staticmethod
+    def decrypt_blob(ciphertext_b64: str, iv_b64: str, key: bytes) -> bytes:
+        """
+        Decrypt a blob-level AES-256-GCM payload.
+
+        Raises:
+            ValueError — if decryption fails (wrong key, corrupted data, tampered tag)
+        """
+        try:
+            iv = base64.b64decode(iv_b64)
+            ct = base64.b64decode(ciphertext_b64)
+            return AESGCM(key).decrypt(iv, ct, None)
+        except InvalidTag as exc:
+            logger.error("Blob decryption: AES-GCM tag verification failed")
+            raise ValueError("Decryption failed: authentication tag mismatch") from exc
+        except Exception as exc:
+            logger.error("Blob decryption error: %s", exc, exc_info=True)
+            raise ValueError(f"Decryption failed: {exc}") from exc
+
+    @staticmethod
     def decrypt_fields(
         key: bytes,
         *,

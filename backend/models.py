@@ -20,6 +20,7 @@ class User(Base):
     entries          = relationship("Entry",          back_populates="user", cascade="all, delete-orphan")
     health_snapshots = relationship("HealthSnapshot", back_populates="user", cascade="all, delete-orphan")
     hibp_runs        = relationship("HibpRun",        back_populates="user", cascade="all, delete-orphan")
+    data_audit_logs  = relationship("DataAuditLog",   back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<User id={self.id} username={self.username!r}>"
@@ -97,3 +98,20 @@ class HibpRun(Base):
 
     def __repr__(self) -> str:
         return f"<HibpRun id={self.id} user_id={self.user_id} total={self.total} pwned={self.pwned}>"
+
+
+class DataAuditLog(Base):
+    __tablename__ = "data_audit_logs"
+
+    id             = Column(Integer, primary_key=True, index=True)
+    user_id        = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    action         = Column(String(32), nullable=False)   # export_backup | export_bitwarden | import
+    status         = Column(String(16), nullable=False)   # success | error
+    entries_count  = Column(Integer, nullable=True)       # entries exported/imported (None on error)
+    detail         = Column(String(512), nullable=True)   # error message or extra context
+    created_at     = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    user = relationship("User", back_populates="data_audit_logs")
+
+    def __repr__(self) -> str:
+        return f"<DataAuditLog id={self.id} user_id={self.user_id} action={self.action!r} status={self.status!r}>"

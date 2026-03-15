@@ -186,8 +186,8 @@ export function EntryCard({ entry, onEdit, onDelete, sharedWith }) {
             content={
               <div className="space-y-1">
                 <p className="font-semibold text-[11px]">Same password as:</p>
-                {sharedWith.map(t => (
-                  <p key={t} className="text-muted-foreground">• {t}</p>
+                {sharedWith.map((t, i) => (
+                  <p key={i} className="text-muted-foreground">• {t}</p>
                 ))}
               </div>
             }

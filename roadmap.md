@@ -22,20 +22,22 @@
 
 > Making it easier to switch to Tengen and day-to-day use smoother.
 
-- [ ] Import from CSV
-- [ ] Import from Bitwarden export
-- [ ] Import from 1Password export
-- [ ] Encrypted vault backup / export
+- [x] Encrypted vault backup / export (.tengen)
 - [x] Favicon fetching for entry URLs
-- [ ] Keyboard shortcuts
 - [x] Duplicate password warnings on entry cards
 - [x] Password age warnings (flag entries older than 90 days)
 - [x] Vault search improvements (search by username, notes)
 
-## 🔜 v1.2 — Security Hardening
+## 🔜 v1.2 — Security Hardening & Import
 
-> Going deeper on the security layer.
+> Going deeper on the security layer, plus cross-app migration.
 
+- [ ] Import from Bitwarden JSON export
+- [ ] Import from 1Password CSV export
+- [ ] Import from LastPass CSV export
+- [ ] Import from Chrome / Firefox / Edge CSV export
+- [ ] Import from Dashlane CSV export
+- [ ] Import from KeePass CSV export
 - [ ] HTTPS support with self-signed cert auto-generation
 - [ ] Vault unlock with biometrics (browser WebAuthn API)
 - [ ] Login attempt rate limiting + lockout
