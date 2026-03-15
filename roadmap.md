@@ -30,7 +30,7 @@
 - [ ] Keyboard shortcuts
 - [x] Duplicate password warnings on entry cards
 - [x] Password age warnings (flag entries older than 90 days)
-- [ ] Vault search improvements (search by username, notes)
+- [x] Vault search improvements (search by username, notes)
 
 ## 🔜 v1.2 — Security Hardening
 

@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useClipboard } from '@/hooks/useClipboard'
 import { toolsApi } from '@/api/tools'
-import { STRENGTH_LABELS, STRENGTH_COLORS, STRENGTH_BG, timeAgo, cn } from '@/lib/utils'
+import { STRENGTH_LABELS, STRENGTH_COLORS, STRENGTH_BG, timeAgo, cn, getAgeDays, PASSWORD_AGE_THRESHOLD_DAYS } from '@/lib/utils'
 import { EntryFavicon } from '@/components/vault/EntryFavicon'
 import { Tooltip } from '@/components/ui/Tooltip'
 
@@ -53,9 +53,8 @@ export function EntryCard({ entry, onEdit, onDelete, sharedWith }) {
   const strengthColor = strength != null ? STRENGTH_COLORS[strength] : null
   const strengthBg = strength != null ? STRENGTH_BG[strength] : null
 
-  const ageMs = entry.updated_at ? Date.now() - new Date(entry.updated_at).getTime() : 0
-  const ageDays = Math.floor(ageMs / (24 * 60 * 60 * 1000))
-  const isOld = ageDays > 90
+  const ageDays = getAgeDays(entry.updated_at)
+  const isOld = ageDays > PASSWORD_AGE_THRESHOLD_DAYS
 
   return (
     <motion.div

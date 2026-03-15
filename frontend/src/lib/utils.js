@@ -17,6 +17,15 @@ export function formatDate(dateStr) {
   }).format(d)
 }
 
+/** Days before a password is considered outdated */
+export const PASSWORD_AGE_THRESHOLD_DAYS = 90
+
+/** Get age of a date in whole days (0 if missing) */
+export function getAgeDays(dateStr) {
+  if (!dateStr) return 0
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / (24 * 60 * 60 * 1000))
+}
+
 /** Get relative time string */
 export function timeAgo(dateStr) {
   if (!dateStr) return 'Never'

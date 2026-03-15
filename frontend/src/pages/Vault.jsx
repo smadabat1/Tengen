@@ -51,15 +51,14 @@ export default function VaultPage() {
 
   const queryParams = useMemo(() => ({
     ...(activeTag && { tag: activeTag }),
-    ...(search.trim() && { search: search.trim() }),
     sort,
     order,
-  }), [activeTag, search, sort, order])
+  }), [activeTag, sort, order])
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ['entries', queryParams],
     queryFn: () => vaultApi.listEntries(queryParams),
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60,
   })
 
   // Fetch all entries (no filters) to detect duplicate passwords across the full vault
@@ -69,6 +68,18 @@ export default function VaultPage() {
     staleTime: 1000 * 60,
   })
 
+  // Client-side search across title, url, username, notes (username/notes are encrypted on backend)
+  const filteredEntries = useMemo(() => {
+    if (!search.trim()) return entries
+    const q = search.trim().toLowerCase()
+    return entries.filter(e =>
+      e.title?.toLowerCase().includes(q) ||
+      e.url?.toLowerCase().includes(q) ||
+      e.username?.toLowerCase().includes(q) ||
+      e.notes?.toLowerCase().includes(q)
+    )
+  }, [entries, search])
+
   // Map<password, title[]> — only entries where password appears more than once
   const duplicateMap = useMemo(() => {
     const map = new Map()
@@ -77,8 +88,8 @@ export default function VaultPage() {
       if (!map.has(e.password)) map.set(e.password, [])
       map.get(e.password).push(e.title)
     }
-    for (const [pwd, titles] of map) {
-      if (titles.length < 2) map.delete(pwd)
+    for (const pwd of [...map.keys()]) {
+      if (map.get(pwd).length < 2) map.delete(pwd)
     }
     return map
   }, [allEntries])
@@ -111,7 +122,7 @@ export default function VaultPage() {
               {activeTag ? `#${activeTag}` : 'All entries'}
             </h2>
             <p className="text-xs text-muted-foreground">
-              {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
+              {filteredEntries.length} {filteredEntries.length === 1 ? 'entry' : 'entries'}
             </p>
           </div>
         </div>
@@ -124,8 +135,8 @@ export default function VaultPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search…"
-              className="h-8 w-44 pl-8 pr-7 text-xs bg-secondary border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/50 placeholder:text-muted-foreground/50"
+              placeholder="Search by title, URL, username…"
+              className="h-8 w-72 pl-8 pr-7 text-xs bg-secondary border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/50 placeholder:text-muted-foreground/50"
             />
             {search && (
               <button
@@ -137,7 +148,7 @@ export default function VaultPage() {
             )}
           </div>
 
-          <Select value={sort} onValueChange={setSort} options={SORT_OPTIONS} />
+          <Select value={sort} onValueChange={setSort} options={SORT_OPTIONS} label="Sort by" />
           <button
             onClick={() => setOrder(order === 'desc' ? 'asc' : 'desc')}
             className="text-xs bg-secondary border border-border rounded-lg px-2 py-1.5 hover:bg-secondary/80 transition-colors"
@@ -168,7 +179,7 @@ export default function VaultPage() {
 
       {view === 'grid' ? (
         <EntryGrid
-          entries={entries}
+          entries={filteredEntries}
           onEdit={handleEdit}
           onDelete={handleDelete}
           isLoading={isLoading}
@@ -176,7 +187,7 @@ export default function VaultPage() {
         />
       ) : (
         <EntryTable
-          entries={entries}
+          entries={filteredEntries}
           onEdit={handleEdit}
           onDelete={handleDelete}
           isLoading={isLoading}
