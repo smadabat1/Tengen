@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Copy, Pencil, Trash2, ShieldOff, ShieldAlert, ShieldCheck, Shield, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Copy, Pencil, Trash2, ShieldOff, ShieldAlert, ShieldCheck, Shield, Loader2, CopyCheck } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
@@ -7,10 +7,11 @@ import { useClipboard } from '@/hooks/useClipboard'
 import { toolsApi } from '@/api/tools'
 import { STRENGTH_LABELS, STRENGTH_COLORS, STRENGTH_BG, timeAgo, cn } from '@/lib/utils'
 import { EntryFavicon } from '@/components/vault/EntryFavicon'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 const COLS = ['', 'Title', 'Username', 'Password', 'Tags', 'Strength', 'HIBP', 'Updated', '']
 
-function TableRow({ entry, onEdit, onDelete }) {
+function TableRow({ entry, onEdit, onDelete, sharedWith }) {
   const [showPassword, setShowPassword] = useState(false)
   const [checkingHibp, setCheckingHibp] = useState(false)
   const { copy, copied } = useClipboard()
@@ -72,6 +73,24 @@ function TableRow({ entry, onEdit, onDelete }) {
           <span className="font-mono text-xs text-foreground">
             {showPassword ? entry.password : '•'.repeat(Math.min(entry.password?.length || 10, 14))}
           </span>
+          {sharedWith?.length > 0 && (
+            <Tooltip
+              side="top"
+              content={
+                <div className="space-y-1">
+                  <p className="font-semibold text-[11px]">Same password as:</p>
+                  {sharedWith.map(t => (
+                    <p key={t} className="text-muted-foreground">• {t}</p>
+                  ))}
+                </div>
+              }
+            >
+              <span className="flex items-center gap-0.5 text-[10px] text-amber-500 px-1 py-0.5 rounded bg-amber-500/10 flex-shrink-0 cursor-default">
+                <CopyCheck className="w-2.5 h-2.5" />
+                Reused
+              </span>
+            </Tooltip>
+          )}
           <button
             onClick={() => setShowPassword(!showPassword)}
             className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
@@ -166,7 +185,7 @@ function TableRow({ entry, onEdit, onDelete }) {
   )
 }
 
-export function EntryTable({ entries = [], onEdit, onDelete, isLoading }) {
+export function EntryTable({ entries = [], onEdit, onDelete, isLoading, duplicateMap }) {
   if (isLoading) {
     return (
       <div className="w-full overflow-x-auto">
@@ -229,7 +248,7 @@ export function EntryTable({ entries = [], onEdit, onDelete, isLoading }) {
         </thead>
         <tbody>
           {entries.map(entry => (
-            <TableRow key={entry.id} entry={entry} onEdit={onEdit} onDelete={onDelete} />
+            <TableRow key={entry.id} entry={entry} onEdit={onEdit} onDelete={onDelete} sharedWith={duplicateMap?.get(entry.password)?.filter(t => t !== entry.title)} />
           ))}
         </tbody>
       </table>

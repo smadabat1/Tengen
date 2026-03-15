@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, Copy, Pencil, Trash2, ShieldAlert, ShieldCheck, Shield, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Copy, Pencil, Trash2, ShieldAlert, ShieldCheck, Shield, Loader2, CopyCheck } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useClipboard } from '@/hooks/useClipboard'
 import { toolsApi } from '@/api/tools'
 import { STRENGTH_LABELS, STRENGTH_COLORS, STRENGTH_BG, timeAgo, cn } from '@/lib/utils'
 import { EntryFavicon } from '@/components/vault/EntryFavicon'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 /**
  * EntryCard — displays a single vault entry.
@@ -15,7 +16,7 @@ import { EntryFavicon } from '@/components/vault/EntryFavicon'
  *   onEdit: (entry) => void
  *   onDelete: (entry) => void
  */
-export function EntryCard({ entry, onEdit, onDelete }) {
+export function EntryCard({ entry, onEdit, onDelete, sharedWith }) {
   const [showPassword, setShowPassword] = useState(false)
   const [checkingHibp, setCheckingHibp] = useState(false)
   const { copy, copied } = useClipboard()
@@ -173,6 +174,26 @@ export function EntryCard({ entry, onEdit, onDelete }) {
           <span className={cn('text-[10px] font-medium px-1.5 py-0.5 rounded-md', `${strengthBg}/10`, strengthColor)}>
             {strengthLabel}
           </span>
+        )}
+
+        {/* Duplicate password badge */}
+        {sharedWith?.length > 0 && (
+          <Tooltip
+            side="top"
+            content={
+              <div className="space-y-1">
+                <p className="font-semibold text-[11px]">Same password as:</p>
+                {sharedWith.map(t => (
+                  <p key={t} className="text-muted-foreground">• {t}</p>
+                ))}
+              </div>
+            }
+          >
+            <span className="flex items-center gap-1 text-[10px] text-amber-500 px-1.5 py-0.5 rounded-md bg-amber-500/10 cursor-default">
+              <CopyCheck className="w-3 h-3" />
+              Reused
+            </span>
+          </Tooltip>
         )}
 
         {/* HIBP badge */}
