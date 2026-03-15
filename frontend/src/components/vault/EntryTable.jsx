@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Copy, Pencil, Trash2, ShieldOff, ShieldAlert, ShieldCheck, Shield, Loader2, CopyCheck } from 'lucide-react'
+import { Eye, EyeOff, Copy, Pencil, Trash2, ShieldOff, ShieldAlert, ShieldCheck, Shield, Loader2, CopyCheck, Clock } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
@@ -161,7 +161,17 @@ function TableRow({ entry, onEdit, onDelete, sharedWith }) {
 
       {/* Updated */}
       <td className="py-2.5 pr-4">
-        <span className="text-[10px] text-muted-foreground whitespace-nowrap">{timeAgo(entry.updated_at)}</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-muted-foreground whitespace-nowrap">{timeAgo(entry.updated_at)}</span>
+          {entry.updated_at && (Date.now() - new Date(entry.updated_at).getTime()) > 90 * 24 * 60 * 60 * 1000 && (
+            <Tooltip content="Password not changed in over 90 days" side="top">
+              <span className="flex items-center gap-0.5 text-[10px] text-orange-500 px-1 py-0.5 rounded bg-orange-500/10 flex-shrink-0 cursor-default">
+                <Clock className="w-2.5 h-2.5" />
+                Outdated
+              </span>
+            </Tooltip>
+          )}
+        </div>
       </td>
 
       {/* Actions */}
