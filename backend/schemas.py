@@ -211,6 +211,53 @@ class HibpRunHistoryResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Export / Import schemas
+# ---------------------------------------------------------------------------
+
+class ExportResponse(BaseModel):
+    version: int
+    exported_at: str
+    entries_count: int
+    iv: str
+    data: str
+
+
+MAX_IMPORT_ENTRIES = 2000
+
+class ImportRequest(BaseModel):
+    version: int = Field(..., ge=1, le=1)
+    iv: str = Field(..., min_length=16, max_length=32)
+    data: str = Field(..., min_length=1, max_length=10_000_000)
+
+
+class ImportResponse(BaseModel):
+    imported: int
+
+
+# ---------------------------------------------------------------------------
+# Data audit log schemas
+# ---------------------------------------------------------------------------
+
+class DataAuditLogResponse(BaseModel):
+    id: int
+    action: str
+    status: str
+    entries_count: int | None
+    detail: str | None
+    created_at: datetime
+
+    @field_serializer("created_at", when_used="json")
+    def _serialize_created_at(self, v: datetime) -> datetime:
+        return _as_utc(v)  # type: ignore[return-value]
+
+    model_config = {"from_attributes": True}
+
+
+class DataAuditLogHistoryResponse(BaseModel):
+    logs: list[DataAuditLogResponse]
+
+
+# ---------------------------------------------------------------------------
 # Generic error response (used by exception handler)
 # ---------------------------------------------------------------------------
 

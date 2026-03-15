@@ -18,4 +18,16 @@ export const vaultApi = {
 
   listTags: () =>
     apiClient.get('/vault/tags').then((r) => r.data),
+
+  exportVault: () =>
+    apiClient.get('/vault/export').then((r) => r.data),
+
+  exportBitwarden: () =>
+    apiClient.get('/vault/export/bitwarden').then((r) => r.data),
+
+  importVault: (payload) =>
+    apiClient.post('/vault/import', payload).then((r) => r.data),
+
+  getAuditLog: () =>
+    apiClient.get('/vault/audit-log').then((r) => r.data),
 }

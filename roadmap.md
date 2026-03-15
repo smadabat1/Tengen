@@ -25,9 +25,8 @@
 - [ ] Import from CSV
 - [ ] Import from Bitwarden export
 - [ ] Import from 1Password export
-- [ ] Encrypted vault backup / export
+- [x] Encrypted vault backup / export
 - [x] Favicon fetching for entry URLs
-- [ ] Keyboard shortcuts
 - [x] Duplicate password warnings on entry cards
 - [x] Password age warnings (flag entries older than 90 days)
 - [x] Vault search improvements (search by username, notes)

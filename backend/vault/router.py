@@ -4,17 +4,24 @@ All logic delegated to VaultService.
 HIBP check is triggered as a FastAPI BackgroundTask after create/update.
 """
 
-from fastapi import APIRouter, Depends, BackgroundTasks, Query
+import json
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, BackgroundTasks, Query, HTTPException
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import User
 from schemas import (
     EntryCreateRequest, EntryUpdateRequest,
     EntryResponse, TagsResponse,
+    ExportResponse, ImportRequest, ImportResponse,
+    DataAuditLogHistoryResponse,
+    MAX_IMPORT_ENTRIES,
 )
+from models import DataAuditLog
 from auth.dependencies import get_current_user
 from vault.service import VaultService
+from vault.encryption import EncryptionService
 from core.logger import get_logger
 
 logger = get_logger(__name__)
@@ -83,6 +90,77 @@ async def delete_entry(
     VaultService.delete_entry(entry_id, user.id, db)
 
 
+@router.get("/export", response_model=ExportResponse)
+async def export_vault(
+    auth: tuple = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user, key = auth
+    entries = VaultService.get_all_entries_raw(user.id, key, db)
+    payload = json.dumps(entries, default=str).encode("utf-8")
+    iv_b64, ciphertext_b64 = EncryptionService.encrypt_blob(payload, key)
+    _save_audit_log(db, user.id, "export_backup", "success", len(entries))
+    return ExportResponse(
+        version=1,
+        exported_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        entries_count=len(entries),
+        iv=iv_b64,
+        data=ciphertext_b64,
+    )
+
+
+@router.get("/export/bitwarden")
+async def export_bitwarden(
+    auth: tuple = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user, key = auth
+    entries = VaultService.get_all_entries_raw(user.id, key, db)
+    result = VaultService.entries_to_bitwarden(entries)
+    _save_audit_log(db, user.id, "export_bitwarden", "success", len(entries))
+    return result
+
+
+@router.post("/import", response_model=ImportResponse)
+async def import_vault(
+    body: ImportRequest,
+    auth: tuple = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user, key = auth
+    try:
+        plaintext = EncryptionService.decrypt_blob(body.data, body.iv, key)
+        entries = json.loads(plaintext)
+    except (ValueError, json.JSONDecodeError) as exc:
+        _save_audit_log(db, user.id, "import", "error", detail="Invalid or corrupted backup file")
+        raise HTTPException(status_code=400, detail="Invalid or corrupted backup file") from exc
+    if not isinstance(entries, list):
+        _save_audit_log(db, user.id, "import", "error", detail="Invalid backup format")
+        raise HTTPException(status_code=400, detail="Invalid backup format")
+    if len(entries) > MAX_IMPORT_ENTRIES:
+        _save_audit_log(db, user.id, "import", "error", detail=f"Too many entries ({len(entries)})")
+        raise HTTPException(status_code=400, detail=f"Too many entries (max {MAX_IMPORT_ENTRIES})")
+    count = VaultService.bulk_create_entries(user.id, key, entries, db)
+    _save_audit_log(db, user.id, "import", "success", count)
+    return ImportResponse(imported=count)
+
+
+@router.get("/audit-log", response_model=DataAuditLogHistoryResponse)
+async def get_audit_log(
+    auth: tuple = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user, _ = auth
+    logs = (
+        db.query(DataAuditLog)
+        .filter(DataAuditLog.user_id == user.id)
+        .order_by(DataAuditLog.created_at.desc())
+        .limit(50)
+        .all()
+    )
+    return DataAuditLogHistoryResponse(logs=logs)
+
+
 @router.get("/tags", response_model=TagsResponse)
 async def list_tags(
     auth: tuple = Depends(get_current_user),
@@ -95,6 +173,38 @@ async def list_tags(
 # ---------------------------------------------------------------------------
 # Internal helper — avoids circular imports with tools/hibp
 # ---------------------------------------------------------------------------
+
+def _save_audit_log(
+    db: Session,
+    user_id: int,
+    action: str,
+    status: str,
+    entries_count: int | None = None,
+    detail: str | None = None,
+) -> None:
+    """Persist a data audit log entry and trim to 50 most recent per user."""
+    log = DataAuditLog(
+        user_id=user_id,
+        action=action,
+        status=status,
+        entries_count=entries_count,
+        detail=detail,
+    )
+    db.add(log)
+    db.flush()  # get the new id without a full commit
+    # Trim: keep only the 50 most recent rows for this user
+    oldest = (
+        db.query(DataAuditLog.id)
+        .filter(DataAuditLog.user_id == user_id)
+        .order_by(DataAuditLog.created_at.desc())
+        .offset(50)
+        .all()
+    )
+    if oldest:
+        ids = [r.id for r in oldest]
+        db.query(DataAuditLog).filter(DataAuditLog.id.in_(ids)).delete(synchronize_session=False)
+    db.commit()
+
 
 def _schedule_hibp(
     background_tasks: BackgroundTasks,

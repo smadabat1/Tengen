@@ -224,6 +224,97 @@ class VaultService:
         logger.info("Entry deleted: id=%d user_id=%d", entry_id, user_id)
 
     # ------------------------------------------------------------------
+    # Export / Import
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def get_all_entries_raw(user_id: int, key: bytes, db: Session) -> list[dict]:
+        """Return all entries for a user as a list of plaintext dicts (for export)."""
+        entries = db.query(Entry).filter(Entry.user_id == user_id).all()
+        result = []
+        for e in entries:
+            decrypted = EncryptionService.decrypt_fields(
+                key,
+                encrypted_password=e.encrypted_password,
+                iv=e.iv,
+                username=e.username,
+                notes=e.notes,
+            )
+            result.append({
+                "title": e.title,
+                "username": decrypted["username"],
+                "password": decrypted["password"],
+                "url": e.url,
+                "notes": decrypted["notes"],
+                "tags": json.loads(e.tags or "[]"),
+                "created_at": e.created_at.isoformat() if e.created_at else None,
+                "updated_at": e.updated_at.isoformat() if e.updated_at else None,
+            })
+        logger.info("Exported %d raw entries for user_id=%d", len(result), user_id)
+        return result
+
+    @staticmethod
+    def bulk_create_entries(user_id: int, key: bytes, entries: list[dict], db: Session) -> int:
+        """Encrypt and insert a list of plaintext entry dicts. Returns count inserted."""
+        count = 0
+        for data in entries:
+            password = (data.get("password") or "")[:4096]
+            if not password:
+                continue
+            username = (data.get("username") or None)
+            if username is not None:
+                username = username[:512] or None
+            notes = (data.get("notes") or None)
+            if notes is not None:
+                notes = notes[:10000] or None
+            raw_tags = data.get("tags") or []
+            tags = [t.strip().lower()[:64] for t in raw_tags if t.strip()][:20]
+            encrypted = EncryptionService.encrypt_fields(
+                key,
+                password=password,
+                username=username,
+                notes=notes,
+            )
+            result = _zxcvbn.zxcvbn(password)
+            entry = Entry(
+                user_id=user_id,
+                title=(data.get("title") or "Untitled")[:256],
+                url=(data.get("url") or None) and data["url"][:2048],
+                tags=json.dumps(tags),
+                username=encrypted["username"],
+                encrypted_password=encrypted["encrypted_password"],
+                notes=encrypted["notes"],
+                iv=encrypted["iv"],
+                strength_score=result["score"],
+            )
+            db.add(entry)
+            count += 1
+        db.commit()
+        logger.info("Bulk imported %d entries for user_id=%d", count, user_id)
+        return count
+
+    @staticmethod
+    def entries_to_bitwarden(entries: list[dict]) -> dict:
+        """Convert a list of plaintext entry dicts to Bitwarden unencrypted JSON format."""
+        items = []
+        for e in entries:
+            uris = []
+            if e.get("url"):
+                uris.append({"match": None, "uri": e["url"]})
+            items.append({
+                "type": 1,  # Login
+                "name": e.get("title") or "Untitled",
+                "notes": e.get("notes"),
+                "login": {
+                    "username": e.get("username"),
+                    "password": e.get("password"),
+                    "uris": uris,
+                },
+                "fields": [],
+            })
+        return {"encrypted": False, "items": items}
+
+    # ------------------------------------------------------------------
     # Tags
     # ------------------------------------------------------------------
 
