@@ -234,6 +234,28 @@ class ImportResponse(BaseModel):
     imported: int
 
 
+EXTERNAL_IMPORT_FORMATS = {
+    "bitwarden_json", "csv_chrome", "csv_lastpass",
+    "csv_1password", "csv_dashlane", "csv_keepass", "csv_generic",
+}
+
+class ExternalImportRequest(BaseModel):
+    format: str = Field(..., description="One of: " + ", ".join(sorted(EXTERNAL_IMPORT_FORMATS)))
+    data: str = Field(..., min_length=1, max_length=10_000_000)
+
+    @field_validator("format")
+    @classmethod
+    def validate_format(cls, v: str) -> str:
+        if v not in EXTERNAL_IMPORT_FORMATS:
+            raise ValueError(f"Unsupported format. Supported: {', '.join(sorted(EXTERNAL_IMPORT_FORMATS))}")
+        return v
+
+
+class ExternalImportResponse(BaseModel):
+    imported: int
+    skipped: int
+
+
 # ---------------------------------------------------------------------------
 # Data audit log schemas
 # ---------------------------------------------------------------------------

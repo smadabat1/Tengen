@@ -4,12 +4,24 @@ import { Download, Upload, AlertTriangle, Loader2, X, CheckCircle2, XCircle, Ref
 import { toast } from 'sonner'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { vaultApi } from '@/api/vault'
+import {
+  BitwardenIcon, ChromeIcon, LastPassIcon,
+  OnePasswordIcon, DashlaneIcon, KeePassIcon, GenericCsvIcon,
+} from './PasswordManagerIcons'
 
 const ACTION_LABEL = {
-  export_backup:    'Export (Encrypted Backup)',
-  export_bitwarden: 'Export (Bitwarden JSON)',
-  import:           'Import',
+  export_backup:             'Export (Encrypted Backup)',
+  export_bitwarden:          'Export (Bitwarden JSON)',
+  import:                    'Import (.tengen)',
+  import_bitwarden_json:     'Import (Bitwarden JSON)',
+  import_csv_chrome:         'Import (Chrome / Firefox / Edge CSV)',
+  import_csv_lastpass:       'Import (LastPass CSV)',
+  import_csv_1password:      'Import (1Password CSV)',
+  import_csv_dashlane:       'Import (Dashlane CSV)',
+  import_csv_keepass:        'Import (KeePass CSV)',
+  import_csv_generic:        'Import (Generic CSV)',
 }
+
 
 export function DataTab() {
   const queryClient = useQueryClient()
@@ -135,7 +147,7 @@ export function DataTab() {
         </div>
         <div className="flex items-start gap-2 mt-3 px-3 py-2.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400">
           <span className="text-[11px] leading-relaxed">
-            Only <span className="font-mono font-semibold">.tengen</span> backup files are supported for import. Bitwarden, 1Password, and CSV imports are coming soon.
+            Only <span className="font-mono font-semibold">.tengen</span> backup files are supported here. Use the <span className="font-semibold">Import from App</span> section below for Bitwarden, 1Password, LastPass, and CSV files.
           </span>
         </div>
         <details className="mt-3 group">
@@ -164,6 +176,35 @@ export function DataTab() {
             </p>
           </div>
         </details>
+      </div>
+
+      {/* Import from other apps */}
+      <div className="glass border border-border/40 rounded-xl p-5">
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1">Import from App</p>
+        <p className="text-xs text-muted-foreground mb-4">
+          Migrate from another password manager. The format is auto-detected from the file.
+        </p>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {[
+            { fmt: 'bitwarden_json', Icon: BitwardenIcon,    label: 'Bitwarden' },
+            { fmt: 'csv_chrome',     Icon: ChromeIcon,       label: 'Chrome / Firefox / Edge' },
+            { fmt: 'csv_lastpass',   Icon: LastPassIcon,     label: 'LastPass' },
+            { fmt: 'csv_1password',  Icon: OnePasswordIcon,  label: '1Password' },
+            { fmt: 'csv_dashlane',   Icon: DashlaneIcon,     label: 'Dashlane' },
+            { fmt: 'csv_keepass',    Icon: KeePassIcon,      label: 'KeePass' },
+            { fmt: 'csv_generic',    Icon: GenericCsvIcon,   label: 'Generic CSV' },
+          ].map(({ fmt, Icon, label }) => (
+            <div key={fmt} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-secondary border border-border/40">
+              <Icon size={14} />
+              <span className="text-[11px] text-muted-foreground">{label}</span>
+            </div>
+          ))}
+        </div>
+        <div className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-secondary/50 border border-border/40 rounded-lg text-muted-foreground cursor-not-allowed select-none">
+          <Upload className="w-3.5 h-3.5 opacity-50" />
+          Choose File to Import
+          <span className="ml-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-500 uppercase tracking-wide">Coming Soon</span>
+        </div>
       </div>
 
       {/* Bitwarden export */}

@@ -30,4 +30,7 @@ export const vaultApi = {
 
   getAuditLog: () =>
     apiClient.get('/vault/audit-log').then((r) => r.data),
+
+  importExternal: (format, data) =>
+    apiClient.post('/vault/import/external', { format, data }).then((r) => r.data),
 }

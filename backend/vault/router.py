@@ -15,6 +15,7 @@ from schemas import (
     EntryCreateRequest, EntryUpdateRequest,
     EntryResponse, TagsResponse,
     ExportResponse, ImportRequest, ImportResponse,
+    ExternalImportRequest, ExternalImportResponse,
     DataAuditLogHistoryResponse,
     MAX_IMPORT_ENTRIES,
 )
@@ -143,6 +144,26 @@ async def import_vault(
     count = VaultService.bulk_create_entries(user.id, key, entries, db)
     _save_audit_log(db, user.id, "import", "success", count)
     return ImportResponse(imported=count)
+
+
+@router.post("/import/external", response_model=ExternalImportResponse)
+async def import_external(
+    body: ExternalImportRequest,
+    auth: tuple = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user, key = auth
+    try:
+        entries, skipped = VaultService.parse_external_import(body.format, body.data)
+    except (ValueError, KeyError, json.JSONDecodeError) as exc:
+        _save_audit_log(db, user.id, f"import_{body.format}", "error", detail=str(exc)[:256])
+        raise HTTPException(status_code=400, detail="Could not parse the file. Check the format and try again.") from exc
+    if len(entries) > MAX_IMPORT_ENTRIES:
+        _save_audit_log(db, user.id, f"import_{body.format}", "error", detail=f"Too many entries ({len(entries)})")
+        raise HTTPException(status_code=400, detail=f"Too many entries (max {MAX_IMPORT_ENTRIES})")
+    count = VaultService.bulk_create_entries(user.id, key, entries, db)
+    _save_audit_log(db, user.id, f"import_{body.format}", "success", count)
+    return ExternalImportResponse(imported=count, skipped=skipped)
 
 
 @router.get("/audit-log", response_model=DataAuditLogHistoryResponse)
