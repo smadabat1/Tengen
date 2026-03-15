@@ -7,7 +7,6 @@ This project follows [Semantic Versioning](https://semver.org/).
 ## v1.1.0 - 2026-03-16
 
 ### Added
-
 **Encrypted Vault Backup & Export**
 - Download an encrypted `.tengen` backup of your vault — AES-256-GCM encrypted with your session key, only Tengen can restore it
 - Export your vault in Bitwarden-compatible unencrypted JSON format (works with Bitwarden, Vaultwarden, Proton Pass) — guarded by an "unencrypted" warning dialog before download
@@ -26,11 +25,11 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 **Export / Import Activity History**
 - Every export and import — success or failure — is logged to a `DataAuditLog` table (trimmed to 50 rows per user, cascades on account deletion)
-- **Settings → Data → Activity History** shows a live audit log: action type, status (✓/✗), entry count, timestamp, and error details where applicable
+- Settings → Data → Activity History shows a live audit log: action type, status (✓/✗), entry count, timestamp, and error details where applicable
 - Log auto-refreshes after every operation; manual refresh button in the header
 
 **Settings Page — Data Tab**
-- New **Data** tab in Settings (alongside Appearance, Profile, Security)
+- New Data tab in Settings (alongside Appearance, Profile, Security)
 - Collapsible "Import limits & restrictions" section lists all field ceilings transparently
 - Supported import app icons displayed as branded chips (Bitwarden, Chrome, LastPass, 1Password, Dashlane, KeePass)
 
