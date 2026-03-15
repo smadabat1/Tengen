@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, Copy, Pencil, Trash2, ShieldAlert, ShieldCheck, Shield, Loader2, CopyCheck } from 'lucide-react'
+import { Eye, EyeOff, Copy, Pencil, Trash2, ShieldAlert, ShieldCheck, Shield, Loader2, CopyCheck, Clock } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useClipboard } from '@/hooks/useClipboard'
@@ -52,6 +52,10 @@ export function EntryCard({ entry, onEdit, onDelete, sharedWith }) {
   const strengthLabel = strength != null ? STRENGTH_LABELS[strength] : null
   const strengthColor = strength != null ? STRENGTH_COLORS[strength] : null
   const strengthBg = strength != null ? STRENGTH_BG[strength] : null
+
+  const ageMs = entry.updated_at ? Date.now() - new Date(entry.updated_at).getTime() : 0
+  const ageDays = Math.floor(ageMs / (24 * 60 * 60 * 1000))
+  const isOld = ageDays > 90
 
   return (
     <motion.div
@@ -196,18 +200,28 @@ export function EntryCard({ entry, onEdit, onDelete, sharedWith }) {
           </Tooltip>
         )}
 
+        {/* Password age badge */}
+        {isOld && (
+          <Tooltip content={`Not changed in ${ageDays} days`} side="top">
+            <span className="flex items-center gap-1 text-[10px] text-orange-500 px-1.5 py-0.5 rounded-md bg-orange-500/10 cursor-default">
+              <Clock className="w-3 h-3" />
+              Outdated
+            </span>
+          </Tooltip>
+        )}
+
         {/* HIBP badge */}
         <HIBPBadge
           pwned={entry.hibp_pwned}
           checked={!!entry.hibp_checked_at}
           checking={checkingHibp}
         />
-
-        {/* Age */}
-        <span className="text-[10px] text-muted-foreground ml-auto">
-          {timeAgo(entry.updated_at)}
-        </span>
       </div>
+
+      {/* Date — separate row so badges always wrap cleanly */}
+      <p className="text-[10px] text-muted-foreground mt-1.5">
+        {timeAgo(entry.updated_at)}
+      </p>
     </motion.div>
   )
 }
