@@ -41,7 +41,7 @@ class HIBPClient:
         """
 
         # SHA1 required by HIBP k-anonymity API — not used for password storage
-        sha1 = hashlib.sha1(password.encode("utf-8"), usedforsecurity=False).hexdigest().upper() # noqa: B324
+        sha1 = hashlib.sha1(password.encode("utf-8"), usedforsecurity=False).hexdigest().upper() # noqa: B324 # nosemgrep: python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-sha1
         prefix, suffix = sha1[:5], sha1[5:]
 
         try:
