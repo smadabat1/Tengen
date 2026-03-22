@@ -142,6 +142,7 @@ class HIBPCheckResponse(BaseModel):
 
 class HealthSummaryResponse(BaseModel):
     total: int
+    healthy: int     # entries with no issues
     weak: int        # strength_score < 2
     pwned: int       # hibp_pwned = true
     reused: int      # duplicate passwords across entries
@@ -154,6 +155,7 @@ class HealthSummaryResponse(BaseModel):
 
 class HealthSnapshotCreate(BaseModel):
     score: int
+    healthy: int
     weak: int
     pwned: int
     reused: int
@@ -164,6 +166,7 @@ class HealthSnapshotCreate(BaseModel):
 class HealthSnapshotResponse(BaseModel):
     id: int
     score: int
+    healthy: int
     weak: int
     pwned: int
     reused: int

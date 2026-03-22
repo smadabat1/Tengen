@@ -71,6 +71,7 @@ class HealthSnapshot(Base):
     id         = Column(Integer, primary_key=True, index=True)
     user_id    = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     score      = Column(Integer, nullable=False)
+    healthy    = Column(Integer, nullable=False, default=0)
     weak       = Column(Integer, nullable=False, default=0)
     pwned      = Column(Integer, nullable=False, default=0)
     reused     = Column(Integer, nullable=False, default=0)

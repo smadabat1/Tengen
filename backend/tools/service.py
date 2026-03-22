@@ -115,6 +115,7 @@ class ToolsService:
         - pwned  : hibp_pwned = True
         - reused : duplicate plaintext passwords (detected via hash comparison)
         - old    : updated_at older than 90 days
+        - healthy: entries with none of the above issues
         """
         entries = db.query(Entry).filter(Entry.user_id == user_id).all()
         total = len(entries)
@@ -124,6 +125,7 @@ class ToolsService:
         password_hashes: dict[str, int] = {}    # sha256 -> occurrence count
         entry_pw_hashes: dict[int, str] = {}    # entry_id -> sha256
         reused = 0
+        unhealthy_ids: set[int] = set()
 
         threshold = datetime.now(timezone.utc) - timedelta(days=_OLD_THRESHOLD_DAYS)
 
@@ -131,10 +133,12 @@ class ToolsService:
             # Weak
             if entry.strength_score is not None and entry.strength_score < 2:
                 weak += 1
+                unhealthy_ids.add(entry.id)
 
             # Pwned
             if entry.hibp_pwned:
                 pwned += 1
+                unhealthy_ids.add(entry.id)
 
             # Old — compare timezone-aware datetimes
             updated = entry.updated_at
@@ -143,6 +147,7 @@ class ToolsService:
                     updated = updated.replace(tzinfo=timezone.utc)
                 if updated < threshold:
                     old += 1
+                    unhealthy_ids.add(entry.id)
 
             # Reused — decrypt password once and hash it for comparison
             try:
@@ -160,14 +165,19 @@ class ToolsService:
 
         # Count entries sharing a password with at least one other entry
         reused_hashes = {h for h, c in password_hashes.items() if c > 1}
-        reused = sum(1 for h in entry_pw_hashes.values() if h in reused_hashes)
+        for eid, h in entry_pw_hashes.items():
+            if h in reused_hashes:
+                reused += 1
+                unhealthy_ids.add(eid)
+
+        healthy = total - len(unhealthy_ids)
 
         logger.info(
-            "Health summary for user_id=%d: total=%d weak=%d pwned=%d reused=%d old=%d",
-            user_id, total, weak, pwned, reused, old,
+            "Health summary for user_id=%d: total=%d healthy=%d weak=%d pwned=%d reused=%d old=%d",
+            user_id, total, healthy, weak, pwned, reused, old,
         )
         return HealthSummaryResponse(
-            total=total, weak=weak, pwned=pwned, reused=reused, old=old,
+            total=total, healthy=healthy, weak=weak, pwned=pwned, reused=reused, old=old,
         )
 
     # ------------------------------------------------------------------

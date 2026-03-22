@@ -86,9 +86,10 @@ export default function HealthPage() {
 
   const history = historyData?.snapshots ?? []
 
-  const totalIssues = HEALTH_CONFIG.reduce((sum, c) => sum + (health?.[c.key] ?? 0), 0)
   const total = health?.total ?? entries.length
-  const score = total > 0 ? Math.max(0, Math.round(100 - (totalIssues / total) * 100)) : 100
+  const healthyCount = health?.healthy ?? 0
+  const score = total > 0 ? Math.round((healthyCount / total) * 100) : 100
+  const totalIssues = HEALTH_CONFIG.reduce((sum, c) => sum + (health?.[c.key] ?? 0), 0)
 
   const radarData = HEALTH_CONFIG.map(({ key, label }) => ({
     category: label,
@@ -105,12 +106,11 @@ export default function HealthPage() {
 
   const buildSnapshotPayload = (data) => {
     const totalCount = data?.total ?? 0
-    const totalIssues = HEALTH_CONFIG.reduce((sum, c) => sum + (data?.[c.key] ?? 0), 0)
-    const scoreValue = totalCount > 0
-      ? Math.max(0, Math.round(100 - (totalIssues / totalCount) * 100))
-      : 100
+    const healthyCount = data?.healthy ?? 0
+    const scoreValue = totalCount > 0 ? Math.round((healthyCount / totalCount) * 100) : 100
     return {
       score: scoreValue,
+      healthy: healthyCount,
       weak: data?.weak ?? 0,
       pwned: data?.pwned ?? 0,
       reused: data?.reused ?? 0,
@@ -252,6 +252,31 @@ export default function HealthPage() {
                 </div>
               )
             })}
+          </div>
+
+          {/* Natural Language Explanation */}
+          <div className="glass border border-border/40 rounded-xl p-5 mt-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Shield className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-semibold">How is my health calculated?</h3>
+            </div>
+            <div className="space-y-3 text-[11px] leading-relaxed text-muted-foreground">
+              <p>
+                Your overall score of <span className="font-semibold text-foreground">{score}/100</span> reflects the percentage of entries in your vault that are <span className="font-semibold text-foreground">Perfectly Healthy</span>.
+              </p>
+              <p>
+                An entry is considered healthy if it meets all the following criteria:
+              </p>
+              <ul className="list-disc list-inside space-y-1 ml-1">
+                <li><span className="text-foreground font-medium">Strong:</span> It has a high complexity score (zxcvbn score of 2 or more).</li>
+                <li><span className="text-foreground font-medium">Unique:</span> It isn't reused across any other entries in your vault.</li>
+                <li><span className="text-foreground font-medium">Secure:</span> It has not appeared in any known data breaches (HIBP check).</li>
+                <li><span className="text-foreground font-medium">Fresh:</span> It has been updated within the last 90 days.</li>
+              </ul>
+              <p className="pt-1 border-t border-border/20">
+                To improve your score, focus on fixing <span className="text-red-500 font-medium italic">Pwned</span> and <span className="text-orange-500 font-medium italic">Weak</span> passwords first, as these represent the highest security risks.
+              </p>
+            </div>
           </div>
         </div>
 
