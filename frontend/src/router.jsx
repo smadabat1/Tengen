@@ -12,6 +12,7 @@ import { AppLayout } from '@/components/layout/AppLayout'
 const LoginPage    = lazy(() => import('@/pages/Login'))
 const RegisterPage = lazy(() => import('@/pages/Register'))
 const VaultPage    = lazy(() => import('@/pages/Vault'))
+const NotesPage    = lazy(() => import('@/pages/Notes'))
 const HealthPage   = lazy(() => import('@/pages/Health'))
 const SettingsPage = lazy(() => import('@/pages/Settings'))
 const AnalysePage    = lazy(() => import('@/pages/Analyse'))
@@ -73,6 +74,13 @@ const vaultRoute = createRoute({
 })
 
 // ---- Health ----
+const notesRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/notes',
+  component: NotesPage,
+})
+
+// ---- Health ----
 const healthRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/health',
@@ -104,7 +112,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   registerRoute,
-  appRoute.addChildren([vaultRoute, healthRoute, settingsRoute, analyseRoute, generatorRoute]),
+  appRoute.addChildren([vaultRoute, notesRoute, healthRoute, settingsRoute, analyseRoute, generatorRoute]),
 ])
 
 export const router = createRouter({ routeTree })

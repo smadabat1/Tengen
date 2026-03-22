@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Command } from 'cmdk'
-import { Search, Shield, Tag, LogIn } from 'lucide-react'
+import { Search, Shield, Notebook, Tag } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { vaultApi } from '@/api/vault'
 import { cn } from '@/lib/utils'
 
-export function CommandModal({ open, onOpenChange, onSelectEntry, onSelectTag }) {
+export function CommandModal({ open, onOpenChange, onSelectEntry, onSelectNote, onSelectTag }) {
   const [query, setQuery] = useState('')
 
   const { data: entries = [] } = useQuery({
@@ -15,9 +15,28 @@ export function CommandModal({ open, onOpenChange, onSelectEntry, onSelectTag })
     enabled: open,
   })
 
+  const { data: notes = [] } = useQuery({
+    queryKey: ['notes', {}],
+    queryFn: () => vaultApi.listNotes({}),
+    staleTime: 1000 * 30,
+    enabled: open,
+  })
+
   const { data: tagsData } = useQuery({
     queryKey: ['tags'],
     queryFn: vaultApi.listTags,
+    staleTime: 1000 * 30,
+    enabled: open,
+  })
+  const { data: noteTagsData } = useQuery({
+    queryKey: ['note-tags'],
+    queryFn: vaultApi.listNoteTags,
+    staleTime: 1000 * 30,
+    enabled: open,
+  })
+  const { data: noteFoldersData } = useQuery({
+    queryKey: ['note-folders'],
+    queryFn: vaultApi.listNoteFolders,
     staleTime: 1000 * 30,
     enabled: open,
   })
@@ -35,10 +54,28 @@ export function CommandModal({ open, onOpenChange, onSelectEntry, onSelectTag })
       )
     : entries.slice(0, 8)
 
+  const filteredNotes = query.trim()
+    ? notes.filter((n) =>
+        n.title?.toLowerCase().includes(query.toLowerCase()) ||
+        n.folder_name?.toLowerCase().includes(query.toLowerCase()) ||
+        (n.tags || []).some((t) => t.toLowerCase().includes(query.toLowerCase()))
+      )
+    : notes.slice(0, 8)
+
   const allTags = tagsData?.tags || []
   const filteredTags = query.trim()
     ? allTags.filter((t) => t.toLowerCase().includes(query.toLowerCase()))
     : allTags.slice(0, 5)
+
+  const allNoteTags = noteTagsData?.tags || []
+  const filteredNoteTags = query.trim()
+    ? allNoteTags.filter((t) => t.name?.toLowerCase().includes(query.toLowerCase()))
+    : allNoteTags.slice(0, 5)
+
+  const allNoteFolders = noteFoldersData?.folders || []
+  const filteredNoteFolders = query.trim()
+    ? allNoteFolders.filter((f) => f.name?.toLowerCase().includes(query.toLowerCase()))
+    : allNoteFolders.slice(0, 5)
 
   return (
     <div
@@ -116,6 +153,38 @@ export function CommandModal({ open, onOpenChange, onSelectEntry, onSelectTag })
                 </Command.Group>
               )}
 
+              {filteredNotes.length > 0 && (
+                <Command.Group
+                  heading={
+                    <span className="px-4 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                      Notes
+                    </span>
+                  }
+                >
+                  {filteredNotes.map((note) => (
+                    <Command.Item
+                      key={`note:${note.id}`}
+                      value={`note:${note.id}`}
+                      onSelect={() => {
+                        onSelectNote?.(note)
+                        onOpenChange(false)
+                      }}
+                      className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-secondary/60 aria-selected:bg-secondary/60 transition-colors outline-none"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                        <Notebook className="w-3.5 h-3.5 text-emerald-500" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium truncate">{note.title}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">
+                          {note.folder_name || 'General'}
+                        </p>
+                      </div>
+                    </Command.Item>
+                  ))}
+                </Command.Group>
+              )}
+
               {filteredTags.length > 0 && (
                 <Command.Group
                   heading={
@@ -133,6 +202,50 @@ export function CommandModal({ open, onOpenChange, onSelectEntry, onSelectTag })
                     >
                       <Tag className="w-3.5 h-3.5 text-muted-foreground" />
                       <span className="text-sm">#{tag}</span>
+                    </Command.Item>
+                  ))}
+                </Command.Group>
+              )}
+
+              {filteredNoteTags.length > 0 && (
+                <Command.Group
+                  heading={
+                    <span className="px-4 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                      Note tags
+                    </span>
+                  }
+                >
+                  {filteredNoteTags.map((tag) => (
+                    <Command.Item
+                      key={`note-tag:${tag.id}`}
+                      value={`note-tag:${tag.name}`}
+                      onSelect={() => onOpenChange(false)}
+                      className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-secondary/60 aria-selected:bg-secondary/60 transition-colors outline-none"
+                    >
+                      <Tag className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-sm">#{tag.name}</span>
+                    </Command.Item>
+                  ))}
+                </Command.Group>
+              )}
+
+              {filteredNoteFolders.length > 0 && (
+                <Command.Group
+                  heading={
+                    <span className="px-4 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                      Note folders
+                    </span>
+                  }
+                >
+                  {filteredNoteFolders.map((folder) => (
+                    <Command.Item
+                      key={`note-folder:${folder.id}`}
+                      value={`note-folder:${folder.name}`}
+                      onSelect={() => onOpenChange(false)}
+                      className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-secondary/60 aria-selected:bg-secondary/60 transition-colors outline-none"
+                    >
+                      <Tag className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-sm">{folder.name}</span>
                     </Command.Item>
                   ))}
                 </Command.Group>

@@ -69,3 +69,12 @@ async def get_current_user(
         raise UnauthorizedException("Session expired. Please log in again.")
 
     return user, encryption_key
+
+async def get_current_auth(
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
+    db: Session = Depends(get_db),
+) -> tuple[User, bytes, str]:
+    """Like get_current_user but also returns the raw bearer token."""
+    user, key = await get_current_user(credentials, db)
+    token = credentials.credentials if credentials else ""
+    return user, key, token

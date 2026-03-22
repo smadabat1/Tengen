@@ -18,7 +18,7 @@
 - [x] Docker Compose — one command setup
 - [x] Security headers + CSP
 
-## 🔜 v1.1 — Polish & Import (Released)
+## ✅ v1.1 — Polish & Import (Released)
 
 > Making it easier to switch to Tengen and day-to-day use smoother.
 
@@ -28,17 +28,37 @@
 - [x] Password age warnings (flag entries older than 90 days)
 - [x] Vault search improvements (search by username, notes)
 
-## 🔜 v1.2 — Security & Health (WIP)
+## ✅ v1.2 — Notes Vault & Security (Released)
 
-> Going deeper on the security layer, plus cross-app migration.
+> Private notes, stronger vault ergonomics, and backup evolution.
 
 - [x] Refined Vault Health Security Scoring (Perfectly Healthy percentage)
-- [ ] Import from Bitwarden JSON export
-- [ ] Import from 1Password CSV export
-- [ ] Import from LastPass CSV export
-- [ ] Import from Chrome / Firefox / Edge CSV export
-- [ ] Import from Dashlane CSV export
-- [ ] Import from KeePass CSV export
+- [x] Private Notes section (encrypted notes with folder + tag organisation)
+- [x] Notes block editor (Tiptap)
+- [x] Per-note lock with PIN/password
+- [x] Notes search with lock-aware behavior (body searchable only after unlock)
+- [x] Notes APIs (`/vault/notes`, `/vault/note-folders`, `/vault/note-tags`)
+- [x] Encrypted backup v2 with notes export/import support
+- [x] Command palette integration for opening notes
+- [x] Import from Bitwarden JSON export (backend)
+- [x] Import from 1Password CSV export (backend)
+- [x] Import from LastPass CSV export (backend)
+- [x] Import from Chrome / Firefox / Edge CSV export (backend)
+- [x] Import from Dashlane CSV export (backend)
+- [x] Import from KeePass CSV export (backend)
+
+## 🔜 v1.2.1 — Bug Fixes
+
+> Squashing a few bugs found from the major v1.2 launch.
+
+- [ ] Fix formatting issue where TipTap markdown shortcuts fail to process correctly
+- [ ] Fix Export/Import logs issue where the notes count is not updating; currently only the password count is displayed.
+
+## 🔜 v1.3 — Hardening & Trust
+
+> Security controls and operational safeguards.
+
+- [ ] Import UI for multiple vendors (Bitwarden/1Password/LastPass/Chrome/Dashlane/KeePass)
 - [ ] HTTPS support with self-signed cert auto-generation
 - [ ] Vault unlock with biometrics (browser WebAuthn API)
 - [ ] Login attempt rate limiting + lockout
@@ -69,4 +89,3 @@
 - [ ] Encrypted file attachments per entry
 - [ ] Self-hosted sync between multiple devices
 - [ ] Third-party security audit (codebase review by Cure53 or similar)
-

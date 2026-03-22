@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from sqlalchemy import (
     Boolean, Column, DateTime, ForeignKey,
-    Integer, String, Text,
+    Integer, String, Text, UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
 from database import Base
@@ -18,6 +18,9 @@ class User(Base):
     created_at       = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     entries          = relationship("Entry",          back_populates="user", cascade="all, delete-orphan")
+    note_folders     = relationship("NoteFolder",     back_populates="user", cascade="all, delete-orphan")
+    notes            = relationship("VaultNote",      back_populates="user", cascade="all, delete-orphan")
+    note_tags        = relationship("NoteTag",        back_populates="user", cascade="all, delete-orphan")
     health_snapshots = relationship("HealthSnapshot", back_populates="user", cascade="all, delete-orphan")
     hibp_runs        = relationship("HibpRun",        back_populates="user", cascade="all, delete-orphan")
     data_audit_logs  = relationship("DataAuditLog",   back_populates="user", cascade="all, delete-orphan")
@@ -63,6 +66,92 @@ class Entry(Base):
 
     def __repr__(self) -> str:
         return f"<Entry id={self.id} title={self.title!r} user_id={self.user_id}>"
+
+
+class NoteFolder(Base):
+    __tablename__ = "note_folders"
+    __table_args__ = (
+        UniqueConstraint("user_id", "name_encrypted", "iv", name="uq_note_folder_user_name_iv"),
+    )
+
+    id            = Column(Integer, primary_key=True, index=True)
+    user_id       = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    name_encrypted = Column(Text, nullable=False)
+    iv            = Column(String(32), nullable=False)
+    is_default    = Column(Boolean, default=False, nullable=False)
+    created_at    = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at    = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
+    user = relationship("User", back_populates="note_folders")
+    notes = relationship("VaultNote", back_populates="folder")
+
+
+class VaultNote(Base):
+    __tablename__ = "vault_notes"
+
+    id               = Column(Integer, primary_key=True, index=True)
+    user_id          = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    folder_id        = Column(Integer, ForeignKey("note_folders.id", ondelete="RESTRICT"), nullable=False, index=True)
+    title_encrypted  = Column(Text, nullable=False)
+    content_encrypted = Column(Text, nullable=False)  # JSON string encrypted
+    iv               = Column(String(32), nullable=False)
+    is_locked        = Column(Boolean, default=False, nullable=False)
+    lock_salt        = Column(String(64), nullable=True)
+    lock_verifier    = Column(String(128), nullable=True)
+    wrapped_note_key = Column(Text, nullable=True)
+    created_at       = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at       = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
+    user = relationship("User", back_populates="notes")
+    folder = relationship("NoteFolder", back_populates="notes")
+    tag_links = relationship("NoteTagLink", back_populates="note", cascade="all, delete-orphan")
+
+
+class NoteTag(Base):
+    __tablename__ = "note_tags"
+    __table_args__ = (
+        UniqueConstraint("user_id", "name_encrypted", "iv", name="uq_note_tag_user_name_iv"),
+    )
+
+    id             = Column(Integer, primary_key=True, index=True)
+    user_id        = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    name_encrypted = Column(Text, nullable=False)
+    iv             = Column(String(32), nullable=False)
+    created_at     = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at     = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
+    user = relationship("User", back_populates="note_tags")
+    note_links = relationship("NoteTagLink", back_populates="tag", cascade="all, delete-orphan")
+
+
+class NoteTagLink(Base):
+    __tablename__ = "note_tag_links"
+    __table_args__ = (
+        UniqueConstraint("note_id", "tag_id", name="uq_note_tag_link"),
+    )
+
+    id         = Column(Integer, primary_key=True, index=True)
+    note_id    = Column(Integer, ForeignKey("vault_notes.id", ondelete="CASCADE"), nullable=False, index=True)
+    tag_id     = Column(Integer, ForeignKey("note_tags.id", ondelete="CASCADE"), nullable=False, index=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    note = relationship("VaultNote", back_populates="tag_links")
+    tag = relationship("NoteTag", back_populates="note_links")
 
 
 class HealthSnapshot(Base):
