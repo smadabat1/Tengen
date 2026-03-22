@@ -4,6 +4,15 @@ All notable changes to Tengen will be documented in this file.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## v1.2.0 - 2026-03-22
+
+### Added
+**Refined Vault Health Scoring**
+- Improved the Overall Health Score calculation to represent the percentage of "Perfectly Healthy" entries rather than a raw count of issues.
+- A "Perfectly Healthy" entry must be unique, strong (zxcvbn score ≥ 2), not pwned, and updated within the last 90 days.
+- Added a "How is my health calculated?" section to the Health dashboard providing a clear, natural-language breakdown of the security criteria.
+- Backend support for tracking and persisting healthy entry counts in the database and health snapshots.
+
 ## v1.1.0 - 2026-03-16
 
 ### Added

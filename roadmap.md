@@ -28,10 +28,11 @@
 - [x] Password age warnings (flag entries older than 90 days)
 - [x] Vault search improvements (search by username, notes)
 
-## 🔜 v1.2 — Security Hardening & Import
+## 🔜 v1.2 — Security & Health (WIP)
 
 > Going deeper on the security layer, plus cross-app migration.
 
+- [x] Refined Vault Health Security Scoring (Perfectly Healthy percentage)
 - [ ] Import from Bitwarden JSON export
 - [ ] Import from 1Password CSV export
 - [ ] Import from LastPass CSV export
