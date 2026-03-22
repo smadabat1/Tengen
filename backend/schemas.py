@@ -221,6 +221,7 @@ class ExportResponse(BaseModel):
     version: int
     exported_at: str
     entries_count: int
+    notes_count: int = 0
     iv: str
     data: str
 
@@ -228,7 +229,7 @@ class ExportResponse(BaseModel):
 MAX_IMPORT_ENTRIES = 2000
 
 class ImportRequest(BaseModel):
-    version: int = Field(..., ge=1, le=1)
+    version: int = Field(..., ge=1, le=2)
     iv: str = Field(..., min_length=16, max_length=32)
     data: str = Field(..., min_length=1, max_length=10_000_000)
 
@@ -258,6 +259,94 @@ class ExternalImportResponse(BaseModel):
     imported: int
     skipped: int
 
+
+# ---------------------------------------------------------------------------
+# Notes schemas
+# ---------------------------------------------------------------------------
+
+class NoteFolderCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=128)
+
+class NoteFolderUpdateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=128)
+
+class NoteFolderResponse(BaseModel):
+    id: int
+    name: str
+    is_default: bool
+    note_count: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+    @field_serializer("created_at", "updated_at", when_used="json")
+    def _serialize_note_folder_datetimes(self, v: datetime) -> datetime:
+        return _as_utc(v)  # type: ignore[return-value]
+
+class NoteTagResponse(BaseModel):
+    id: int
+    name: str
+    note_count: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+    @field_serializer("created_at", "updated_at", when_used="json")
+    def _serialize_note_tag_datetimes(self, v: datetime) -> datetime:
+        return _as_utc(v)  # type: ignore[return-value]
+
+class NoteTagsResponse(BaseModel):
+    tags: list[NoteTagResponse]
+
+class NoteCreateRequest(BaseModel):
+    title: str = Field(..., min_length=1, max_length=512)
+    content: Any = Field(default_factory=dict)
+    folder_id: int | None = None
+    tags: list[str] = Field(default_factory=list)
+
+    @field_validator("tags")
+    @classmethod
+    def validate_tags(cls, v: list[str]) -> list[str]:
+        return [t.strip().lower()[:64] for t in v if t.strip()]
+
+class NoteUpdateRequest(BaseModel):
+    title: str | None = Field(None, min_length=1, max_length=512)
+    content: Any | None = None
+    folder_id: int | None = None
+    tags: list[str] | None = None
+
+    @field_validator("tags")
+    @classmethod
+    def validate_tags(cls, v: list[str] | None) -> list[str] | None:
+        if v is None:
+            return None
+        return [t.strip().lower()[:64] for t in v if t.strip()]
+
+class NoteResponse(BaseModel):
+    id: int
+    title: str
+    content: Any | None = None
+    folder_id: int
+    folder_name: str
+    tags: list[str]
+    is_locked: bool
+    is_unlocked: bool = False
+    created_at: datetime
+    updated_at: datetime
+
+    @field_serializer("created_at", "updated_at", when_used="json")
+    def _serialize_note_datetimes(self, v: datetime) -> datetime:
+        return _as_utc(v)  # type: ignore[return-value]
+
+class NoteLockRequest(BaseModel):
+    secret: str = Field(..., min_length=4, max_length=128)
+
+class NoteUnlockRequest(BaseModel):
+    secret: str = Field(..., min_length=4, max_length=128)
+
+class NoteLockResponse(BaseModel):
+    message: str
+
+class NoteFoldersResponse(BaseModel):
+    folders: list[NoteFolderResponse]
 
 # ---------------------------------------------------------------------------
 # Data audit log schemas

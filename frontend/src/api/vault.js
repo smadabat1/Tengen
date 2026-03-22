@@ -33,4 +33,43 @@ export const vaultApi = {
 
   importExternal: (format, data) =>
     apiClient.post('/vault/import/external', { format, data }).then((r) => r.data),
+
+  listNotes: (params = {}) =>
+    apiClient.get('/vault/notes', { params }).then((r) => r.data),
+
+  createNote: (data) =>
+    apiClient.post('/vault/notes', data).then((r) => r.data),
+
+  getNote: (id) =>
+    apiClient.get(`/vault/notes/${id}`).then((r) => r.data),
+
+  updateNote: (id, data) =>
+    apiClient.put(`/vault/notes/${id}`, data).then((r) => r.data),
+
+  deleteNote: (id) =>
+    apiClient.delete(`/vault/notes/${id}`).then((r) => r.data),
+
+  lockNote: (id, secret) =>
+    apiClient.post(`/vault/notes/${id}/lock`, { secret }).then((r) => r.data),
+
+  unlockNote: (id, secret) =>
+    apiClient.post(`/vault/notes/${id}/unlock`, { secret }).then((r) => r.data),
+
+  removeNoteLock: (id) =>
+    apiClient.delete(`/vault/notes/${id}/lock`).then((r) => r.data),
+
+  listNoteFolders: () =>
+    apiClient.get('/vault/note-folders').then((r) => r.data),
+
+  createNoteFolder: (name) =>
+    apiClient.post('/vault/note-folders', { name }).then((r) => r.data),
+
+  updateNoteFolder: (id, name) =>
+    apiClient.put(`/vault/note-folders/${id}`, { name }).then((r) => r.data),
+
+  deleteNoteFolder: (id) =>
+    apiClient.delete(`/vault/note-folders/${id}`).then((r) => r.data),
+
+  listNoteTags: () =>
+    apiClient.get('/vault/note-tags').then((r) => r.data),
 }

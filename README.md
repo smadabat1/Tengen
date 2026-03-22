@@ -39,6 +39,7 @@ All vault entries are encrypted with **AES-256-GCM** before they touch the datab
 | Category | What's included |
 |---|---|
 | **Vault** | Create, read, update, delete password entries · username, password, URL, notes, tags |
+| **Notes** | Private encrypted notes · folders with contextual menus · tags · expandable block editor · per-note PIN/password lock |
 | **Encryption** | AES-256-GCM per entry · fresh random 96-bit IV per write · ciphertext never leaves server |
 | **Key derivation** | Argon2id (raw mode) for both authentication hash and AES-256 encryption key derivation — memory-hard, GPU-resistant |
 | **Breach detection** | HaveIBeenPwned k-anonymity check · only SHA-1 prefix sent, never the full password · auto-checked on create/update · manual on-demand · batch scan all entries |
@@ -220,6 +221,19 @@ All protected endpoints require `Authorization: Bearer <token>`.
 | `PUT` | `/vault/entries/{id}` | Update entry |
 | `DELETE` | `/vault/entries/{id}` | Delete entry |
 | `GET` | `/vault/tags` | List all tags for the authenticated user |
+| `GET` | `/vault/notes` | List notes — supports `folder_id`, `tag`, `search`, `sort`, `order` |
+| `POST` | `/vault/notes` | Create note |
+| `GET` | `/vault/notes/{id}` | Get note |
+| `PUT` | `/vault/notes/{id}` | Update note |
+| `DELETE` | `/vault/notes/{id}` | Delete note |
+| `POST` | `/vault/notes/{id}/lock` | Set/update per-note lock |
+| `POST` | `/vault/notes/{id}/unlock` | Unlock note body for current session |
+| `DELETE` | `/vault/notes/{id}/lock` | Remove per-note lock |
+| `GET` | `/vault/note-folders` | List note folders |
+| `POST` | `/vault/note-folders` | Create note folder |
+| `PUT` | `/vault/note-folders/{id}` | Rename note folder |
+| `DELETE` | `/vault/note-folders/{id}` | Delete folder (moves notes to General) |
+| `GET` | `/vault/note-tags` | List note tags with usage counts |
 
 ### Tools
 

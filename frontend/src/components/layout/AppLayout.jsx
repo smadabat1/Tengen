@@ -15,6 +15,7 @@ export function AppLayout() {
   const [cmdOpen, setCmdOpen] = useState(false)
   const [activeTag, setActiveTag] = useState(null)
   const [pendingViewEntry, setPendingViewEntry] = useState(null)
+  const [pendingViewNote, setPendingViewNote] = useState(null)
   const navigate = useNavigate()
 
   useActivityTracker()
@@ -41,8 +42,13 @@ export function AppLayout() {
     navigate({ to: '/vault' })
   }
 
+  const handleSelectNote = (note) => {
+    setPendingViewNote(note)
+    navigate({ to: '/notes' })
+  }
+
   return (
-    <AppContext.Provider value={{ activeTag, setActiveTag, sidebarOpen, setSidebarOpen, pendingViewEntry, setPendingViewEntry }}>
+    <AppContext.Provider value={{ activeTag, setActiveTag, sidebarOpen, setSidebarOpen, pendingViewEntry, setPendingViewEntry, pendingViewNote, setPendingViewNote }}>
       <div className="h-screen overflow-hidden bg-background flex flex-col">
         <Navbar
           onOpenSearch={() => setCmdOpen(true)}
@@ -71,6 +77,7 @@ export function AppLayout() {
           open={cmdOpen}
           onOpenChange={setCmdOpen}
           onSelectEntry={handleSelectEntry}
+          onSelectNote={handleSelectNote}
           onSelectTag={handleSelectTag}
         />
       </div>

@@ -7,6 +7,22 @@ This project follows [Semantic Versioning](https://semver.org/).
 ## v1.2.0 - 2026-03-22
 
 ### Added
+**Private Notes Vault (v1.2)**
+- Added a new Notes section with encrypted title/content storage, flat folders, and note tags.
+- Added notes CRUD APIs under `/vault/notes`, folder APIs under `/vault/note-folders`, and note tag listing under `/vault/note-tags`.
+- Added per-note lock with PIN/password (`/lock`, `/unlock`, remove lock) and in-memory unlock state per active session.
+- Added lock-aware notes behavior: locked notes keep title visible while body remains hidden until unlock.
+- Added notes to encrypted backup export/import payloads (backup version `2`).
+- Added a Notion-style block editing experience for notes using Tiptap with support for headings, lists, checklists, quote, divider, and code blocks.
+- Added Notes navigation and command palette support to quickly open notes from anywhere in the app.
+- Added debounced notes search with match highlighting across title, folder, and tags (and note body when unlocked).
+- Added collapsible navigation panels for folders and the notes list to maximize the primary writing workspace.
+- Replaced native browser prompts with custom ShadCN modals for secure Folder Creation, Renaming, and Deletion.
+- Upgraded the folder navigation items to feature a Radix DropdownMenu (3-dot contextual menu) on hover.
+- Migrated the Per-Note locking mechanism to a clean, highly visible Lock button on the top toolbar.
+- Added an interactive Tooltip documenting all Markdown shortcuts in the editor header.
+- Designed a custom, semantic, active focus ring for the Editor text area that matches the primary application theme.
+
 **Refined Vault Health Scoring**
 - Improved the Overall Health Score calculation to represent the percentage of "Perfectly Healthy" entries rather than a raw count of issues.
 - A "Perfectly Healthy" entry must be unique, strong (zxcvbn score ≥ 2), not pwned, and updated within the last 90 days.

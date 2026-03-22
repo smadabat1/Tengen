@@ -50,6 +50,9 @@ def get_db():
 
 def init_db() -> None:
     """Create all tables. Called once at startup."""
-    from models import User, Entry, HealthSnapshot, HibpRun, DataAuditLog  # noqa: F401 — imports needed for metadata
+    from models import (
+        User, Entry, NoteFolder, VaultNote, NoteTag, NoteTagLink,
+        HealthSnapshot, HibpRun, DataAuditLog,
+    )  # noqa: F401 — imports needed for metadata
     Base.metadata.create_all(bind=engine)
     logger.info("Database initialised at %s", DATABASE_URL)

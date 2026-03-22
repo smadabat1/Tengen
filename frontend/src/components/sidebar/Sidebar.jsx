@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import * as Dialog from '@radix-ui/react-dialog'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LogOut, ChevronUp, Vault, ShieldCheck, Settings, Sun, Moon, ScanSearch, Wand2 } from 'lucide-react'
+import { LogOut, ChevronUp, Vault, Notebook, ShieldCheck, Settings, Sun, Moon, ScanSearch, Wand2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { vaultApi } from '@/api/vault'
 import { authApi } from '@/api/auth'
@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
   { path: '/vault',      icon: Vault,       label: 'Vault'     },
+  { path: '/notes',      icon: Notebook,    label: 'Notes'     },
   { path: '/health',     icon: ShieldCheck, label: 'Health'    },
   { path: '/analyse',    icon: ScanSearch,  label: 'Analyse'   },
   { path: '/generator',  icon: Wand2,       label: 'Generator' },
