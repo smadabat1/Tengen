@@ -4,9 +4,9 @@
 
 # Tengen
 
-**"I have been maintaining barriers for over 1000 years. Your passwords deserve the same."**
+**"I have been maintaining barriers for over 1000 years. Your secrets deserve the same."**
 
-*A self-hosted, end-to-end encrypted password vault.*
+*A self-hosted, end-to-end encrypted private vault.*
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-6366f1.svg)](LICENSE) [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?logo=fastapi)](https://fastapi.tiangolo.com) [![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](https://react.dev) [![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker)](https://docs.docker.com/compose/)
 
@@ -24,13 +24,13 @@
 
 ## What is Tengen?
 
-Tengen Gojo — wait, wrong show. Tengen, the immortal barrier master of Jujutsu Kaisen, has been maintaining impenetrable barriers for over a thousand years. We thought that was a solid metaphor for a password manager.
+Tengen Gojo — wait, wrong show. Tengen, the immortal barrier master of Jujutsu Kaisen, has been maintaining impenetrable barriers for over a thousand years. We thought that was a solid metaphor for a private vault.
 
-Tengen is an open-source, self-hosted password manager. No clouds. No telemetry. No "we take your privacy seriously" emails after a breach. Just your passwords, your machine, and a barrier that's been holding for a millennium.
+Tengen is an open-source, self-hosted private vault. No clouds. No telemetry. No "we take your privacy seriously" emails after a breach. Just your passwords, your machine, and a barrier that's been holding for a millennium.
 
 All vault entries are encrypted with **AES-256-GCM** before they touch the database — the server never sees a plaintext password. Your encryption key is derived from your master password, lives only in a short-lived in-memory session cache, and is purged on logout or inactivity. Like Tengen himself, it leaves no trace.
 
-> ⚠️ Unlike Tengen, your master password is **not immortal**. If you forget it, your vault is gone. No recovery. No reset. Write it down somewhere safe (ironic, we know).
+> ⚠️ Unlike Tengen, your master password is **not immortal**. If you forget it, your vault is gone. No recovery. No reset. Write it down somewhere safe (ironic, we know). This also means all your encrypted notes are permanently lost.
 
 ---
 
@@ -38,7 +38,7 @@ All vault entries are encrypted with **AES-256-GCM** before they touch the datab
 
 | Category | What's included |
 |---|---|
-| **Vault** | Create, read, update, delete password entries · username, password, URL, notes, tags |
+| **Passwords** | Create, read, update, delete password entries · username, password, URL, notes, tags |
 | **Notes** | Private encrypted notes · folders with contextual menus · tags · expandable block editor · per-note PIN/password lock |
 | **Encryption** | AES-256-GCM per entry · fresh random 96-bit IV per write · ciphertext never leaves server |
 | **Key derivation** | Argon2id (raw mode) for both authentication hash and AES-256 encryption key derivation — memory-hard, GPU-resistant |
@@ -148,21 +148,25 @@ All configuration is done via environment variables in `.env`.
 │                                                      │
 │  auth/   vault/   tools/   core/                     │
 │  ├─ JWT + Argon2id auth                              │
-│  ├─ AES-256-GCM encryption service                  │
+│  ├─ AES-256-GCM encryption service (passwords       │
+│  │   & notes)                                       │
+│  ├─ Per-note lock cache (notes_unlock_cache)        │
 │  ├─ HIBP k-anonymity client (httpx async)           │
 │  ├─ zxcvbn password strength                        │
 │  └─ In-memory session key cache (the barrier)       │
 │                                                      │
 │  SQLAlchemy ORM → SQLite (WAL mode)                  │
+│  models: User · VaultEntry · Note · NoteFolder      │
 └─────────────────────────────────────────────────────┘
 ```
 
 ### Security model
 
-1. **At rest** — every entry's password, username, and notes are AES-256-GCM encrypted. The encryption key is never written to disk. Ever.
+1. **At rest** — every vault entry (passwords, usernames, URLs, field notes) and every private note's body are AES-256-GCM encrypted individually. The encryption key is never written to disk. Ever.
 2. **Authentication** — master passwords are hashed with Argon2id, the current gold standard for password hashing. Not bcrypt. Not MD5. Please not MD5.
 3. **Key derivation & lifecycle** — Argon2id raw mode derives the 256-bit AES key from master password + stored salt on login (same algorithm used for the auth hash, same tunable env params). The key is never stored — it lives only in a TTL session cache and is purged on logout or expiry.
-4. **HIBP privacy** — only the first 5 hex characters of `SHA1(password)` are sent to HaveIBeenPwned. The full hash and plaintext never leave your machine. This is called k-anonymity and it's clever.
+4. **Per-note locks** — individual notes can be protected with an additional PIN/password on top of the vault master key. Unlocked notes are held in a short-lived in-memory cache separate from the main session cache and are cleared on lock or logout.
+5. **HIBP privacy** — only the first 5 hex characters of `SHA1(password)` are sent to HaveIBeenPwned. The full hash and plaintext never leave your machine. This is called k-anonymity and it's clever.
 
 ---
 
@@ -172,10 +176,15 @@ All configuration is done via environment variables in `.env`.
 tengen/
 ├── backend/
 │   ├── auth/               # Registration, login, JWT
-│   ├── vault/              # Entry CRUD + AES-256-GCM encryption
+│   ├── vault/              # Password entries + Notes CRUD + AES-256-GCM encryption
+│   │   ├── service.py          # Password entry service
+│   │   ├── notes_service.py    # Notes & folders service
+│   │   ├── encryption.py       # AES-256-GCM helpers
+│   │   ├── notes_unlock_cache.py # Per-note lock session cache
+│   │   └── router.py           # Vault + Notes API routes
 │   ├── tools/              # Generator, strength, HIBP, health
 │   ├── core/               # Config, security, logger, session cache
-│   ├── models.py           # SQLAlchemy ORM models
+│   ├── models.py           # SQLAlchemy ORM models (User, VaultEntry, Note, NoteFolder)
 │   ├── schemas.py          # Pydantic request/response schemas
 │   ├── database.py         # DB session factory + WAL setup
 │   ├── main.py             # FastAPI app factory + lifespan
@@ -183,8 +192,8 @@ tengen/
 ├── frontend/
 │   ├── src/
 │   │   ├── api/            # Axios client + API modules
-│   │   ├── components/     # Layout, vault, UI primitives
-│   │   ├── pages/          # Vault, Health, Analyse, Generator, Settings
+│   │   ├── components/     # Layout, vault, notes, UI primitives
+│   │   ├── pages/          # Vault, Notes, Health, Analyse, Generator, Settings
 │   │   ├── store/          # Zustand auth store
 │   │   ├── hooks/          # useAutoLock, useClipboard
 │   │   └── router.jsx      # TanStack Router route tree
@@ -306,5 +315,5 @@ Found a vulnerability? Please do not open a public issue. Instead, reach out dir
 <div align="center">
   <sub>Named after the immortal barrier master of Jujutsu Kaisen · Built with FastAPI · React · SQLite · ❤️</sub>
   <br/>
-  <sub>Your passwords have been waiting for a barrier this strong.</sub>
+  <sub>Your passwords and notes have been waiting for a barrier this strong.</sub>
 </div>
