@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Shield, Clock, AlertTriangle, ShieldAlert, Copy, Search } from 'lucide-react'
+import { Shield, Clock, AlertTriangle, ShieldAlert, Copy, Search, Menu } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { toolsApi } from '@/api/tools'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -12,7 +12,7 @@ const HEALTH_PILLS = [
   { key: 'old',    icon: Clock,         color: 'text-blue-400',   label: 'Old' },
 ]
 
-export function Navbar({ onOpenSearch, secondsRemaining }) {
+export function Navbar({ onOpenSearch, secondsRemaining, onToggleMobileDrawer }) {
   const navigate = useNavigate()
   const isCountingDown = secondsRemaining !== null && secondsRemaining <= 60
 
@@ -27,7 +27,16 @@ export function Navbar({ onOpenSearch, secondsRemaining }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/30 glass">
-      <div className="flex items-center h-14 px-5 gap-3">
+      <div className="flex items-center h-14 px-4 gap-3">
+
+        {/* Hamburger — mobile only */}
+        <button
+          onClick={onToggleMobileDrawer}
+          className="md:hidden p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex-shrink-0"
+          aria-label="Open menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
 
         {/* Logo */}
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -70,23 +79,40 @@ export function Navbar({ onOpenSearch, secondsRemaining }) {
               totalIssues > 0 ? 'border-border/50 hover:border-primary/40' : 'border-transparent hover:border-border/30'
             )}
           >
-            {visiblePills.length > 0 ? (
-              visiblePills.map(({ key, icon: Icon, color, label }, i) => (
-                <span key={key} className="flex items-center gap-1">
-                  {i > 0 && <span className="w-px h-3 bg-border/50 mx-0.5 flex-shrink-0" />}
-                  <span className={cn('flex items-center gap-1 text-[11px] font-medium', color)}>
-                    <Icon className="w-3 h-3" />
-                    <span className="font-mono tabular-nums">{health[key]}</span>
-                    <span>{label}</span>
-                  </span>
+            {/* Mobile: compact icon + count */}
+            <span className="flex md:hidden items-center gap-1">
+              {totalIssues > 0 ? (
+                <span className="flex items-center gap-1 text-[11px] font-medium text-orange-500">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <span className="font-mono tabular-nums">{totalIssues}</span>
                 </span>
-              ))
-            ) : (
-              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
-                <span>Secure</span>
-              </span>
-            )}
+              ) : (
+                <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                </span>
+              )}
+            </span>
+
+            {/* Desktop: full pills */}
+            <span className="hidden md:flex items-center gap-1.5">
+              {visiblePills.length > 0 ? (
+                visiblePills.map(({ key, icon: Icon, color, label }, i) => (
+                  <span key={key} className="flex items-center gap-1">
+                    {i > 0 && <span className="w-px h-3 bg-border/50 mx-0.5 flex-shrink-0" />}
+                    <span className={cn('flex items-center gap-1 text-[11px] font-medium', color)}>
+                      <Icon className="w-3 h-3" />
+                      <span className="font-mono tabular-nums">{health[key]}</span>
+                      <span>{label}</span>
+                    </span>
+                  </span>
+                ))
+              ) : (
+                <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                  <span>Secure</span>
+                </span>
+              )}
+            </span>
           </button>
         </Tooltip>
 

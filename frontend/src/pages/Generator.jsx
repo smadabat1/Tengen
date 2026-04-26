@@ -44,7 +44,7 @@ export default function GeneratorPage() {
   const toggle = (key) => setOptions((o) => ({ ...o, [key]: !o[key] }))
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-4 md:p-6 max-w-2xl mx-auto">
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-1">
           <Wand2 className="w-5 h-5 text-primary" />

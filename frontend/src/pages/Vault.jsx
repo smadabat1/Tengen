@@ -105,75 +105,75 @@ export default function VaultPage() {
   }
 
   return (
-    <div className="p-6 max-w-screen-xl mx-auto">
+    <div className="p-4 md:p-6 max-w-screen-xl mx-auto">
       {/* Header bar */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 mb-6">
+        {/* Row 1: title + sidebar toggle + controls (sort, view) */}
+        <div className="flex items-center gap-2">
           <Tooltip content="Toggle sidebar" side="right">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors hidden md:flex flex-shrink-0"
             >
               <SlidersHorizontal className="w-4 h-4" />
             </button>
           </Tooltip>
-          <div>
-            <h2 className="font-heading font-semibold text-lg">
+          <div className="flex-1 min-w-0">
+            <h2 className="font-heading font-semibold text-lg truncate">
               {activeTag ? `#${activeTag}` : 'All entries'}
             </h2>
             <p className="text-xs text-muted-foreground">
               {filteredEntries.length} {filteredEntries.length === 1 ? 'entry' : 'entries'}
             </p>
           </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Select value={sort} onValueChange={setSort} options={SORT_OPTIONS} label="Sort by" />
+            <button
+              onClick={() => setOrder(order === 'desc' ? 'asc' : 'desc')}
+              className="text-xs bg-secondary border border-border rounded-lg px-2 py-1.5 hover:bg-secondary/80 transition-colors"
+            >
+              {order === 'desc' ? '↓' : '↑'}
+            </button>
+            {/* View toggle */}
+            <div className="flex items-center gap-0.5 p-0.5 bg-secondary rounded-lg border border-border/40">
+              {VIEW_TOGGLE.map(({ value, icon: Icon, label }) => (
+                <Tooltip key={value} content={label} side="bottom">
+                  <button
+                    onClick={() => handleViewChange(value)}
+                    className={cn(
+                      'p-1.5 rounded-md transition-colors',
+                      view === value
+                        ? 'bg-card text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                  </button>
+                </Tooltip>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Inline search */}
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by title, URL, username…"
-              className="h-8 w-72 pl-8 pr-7 text-xs bg-secondary border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/50 placeholder:text-muted-foreground/50"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            )}
-          </div>
-
-          <Select value={sort} onValueChange={setSort} options={SORT_OPTIONS} label="Sort by" />
-          <button
-            onClick={() => setOrder(order === 'desc' ? 'asc' : 'desc')}
-            className="text-xs bg-secondary border border-border rounded-lg px-2 py-1.5 hover:bg-secondary/80 transition-colors"
-          >
-            {order === 'desc' ? '↓' : '↑'}
-          </button>
-
-          {/* View toggle */}
-          <div className="flex items-center gap-0.5 p-0.5 bg-secondary rounded-lg border border-border/40">
-            {VIEW_TOGGLE.map(({ value, icon: Icon, label }) => (
-              <Tooltip key={value} content={label} side="bottom">
-                <button
-                  onClick={() => handleViewChange(value)}
-                  className={cn(
-                    'p-1.5 rounded-md transition-colors',
-                    view === value
-                      ? 'bg-card text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                </button>
-              </Tooltip>
-            ))}
-          </div>
+        {/* Row 2: search (full width) */}
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by title, URL, username…"
+            className="h-8 w-full pl-8 pr-7 text-xs bg-secondary border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/50 placeholder:text-muted-foreground/50"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
         </div>
       </div>
 
