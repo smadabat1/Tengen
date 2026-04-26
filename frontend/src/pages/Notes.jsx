@@ -167,6 +167,7 @@ export default function NotesPage() {
   const [selectedFolderForAction, setSelectedFolderForAction] = useState(null);
   const [showFolders, setShowFolders] = useState(true);
   const [showList, setShowList] = useState(true);
+  const [mobilePanel, setMobilePanel] = useState('notes');
 
   useEffect(() => {
     const t = setTimeout(() => setSearch(searchInput), 200);
@@ -353,10 +354,28 @@ export default function NotesPage() {
   const noteTags = tagsData?.tags || [];
 
   return (
-    <div className="h-full p-4 md:p-6">
+    <div className="h-full p-4 md:p-6 flex flex-col">
+      {/* Mobile panel tab switcher — hidden on lg+ */}
+      <div className="flex lg:hidden mb-3 rounded-xl border border-border/50 bg-card/40 overflow-hidden flex-shrink-0">
+        {[['folders', 'Folders'], ['notes', 'Notes'], ['editor', 'Editor']].map(([p, label]) => (
+          <button
+            key={p}
+            onClick={() => setMobilePanel(p)}
+            className={cn(
+              'flex-1 py-2 text-xs font-medium transition-colors',
+              mobilePanel === p
+                ? 'bg-secondary text-foreground border-b-2 border-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       <div
         className={cn(
-          "grid gap-4 h-full min-h-0 transition-all duration-300",
+          "grid gap-4 flex-1 min-h-0 transition-all duration-300",
           showFolders && showList
             ? "grid-cols-1 lg:grid-cols-[240px_320px_minmax(0,1fr)]"
             : !showFolders && showList
@@ -364,8 +383,12 @@ export default function NotesPage() {
               : "grid-cols-1",
         )}
       >
-        {showFolders && showList && (
-          <aside className="border border-border/50 rounded-xl bg-card/40 p-3 overflow-y-auto">
+        {/* Folders panel — mobile: show only when mobilePanel==='folders', desktop: respect showFolders+showList */}
+        <aside className={cn(
+          "border border-border/50 rounded-xl bg-card/40 p-3 overflow-y-auto",
+          mobilePanel === 'folders' ? 'block' : 'hidden',
+          showFolders && showList ? 'lg:block' : 'lg:hidden',
+        )}>
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Folders</p>
               <div className="flex items-center gap-1">
@@ -481,10 +504,13 @@ export default function NotesPage() {
               ))}
             </div>
           </aside>
-        )}
 
-        {showList && (
-          <section className="border border-border/50 rounded-xl bg-card/40 p-3 overflow-hidden min-h-0 flex flex-col">
+        {/* Notes list panel — mobile: show only when mobilePanel==='notes', desktop: respect showList */}
+        <section className={cn(
+          "border border-border/50 rounded-xl bg-card/40 p-3 overflow-hidden min-h-0 flex flex-col",
+          mobilePanel === 'notes' ? 'block' : 'hidden',
+          showList ? 'lg:flex' : 'lg:hidden',
+        )}>
             <div className="flex items-center gap-2 mb-3">
               {!showFolders && (
                 <button
@@ -551,7 +577,7 @@ export default function NotesPage() {
               {notes.map((note) => (
                 <button
                   key={note.id}
-                  onClick={() => setSelectedNoteId(note.id)}
+                  onClick={() => { setSelectedNoteId(note.id); setMobilePanel('editor') }}
                   className={cn(
                     "w-full text-left p-2 rounded-lg border transition-colors",
                     selectedNoteId === note.id
@@ -578,9 +604,13 @@ export default function NotesPage() {
               ))}
             </div>
           </section>
-        )}
 
-        <section className="border border-border/50 rounded-xl bg-card/40 p-4 overflow-hidden min-h-0 flex flex-col">
+        {/* Editor panel — mobile: show only when mobilePanel==='editor', desktop: always shown */}
+        <section className={cn(
+          "border border-border/50 rounded-xl bg-card/40 p-4 overflow-hidden min-h-0 flex flex-col",
+          mobilePanel === 'editor' ? 'flex' : 'hidden',
+          'lg:flex',
+        )}>
           {!selected ? (
             <div className="m-auto text-sm text-muted-foreground flex flex-col items-center gap-2">
               <p>Select or create a note to start editing.</p>

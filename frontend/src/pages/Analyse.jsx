@@ -87,7 +87,7 @@ export default function AnalysePage() {
   const isIdle = !running && liveResults.length === 0
 
   return (
-    <div className="p-6 max-w-screen-xl mx-auto">
+    <div className="p-4 md:p-6 max-w-screen-xl mx-auto">
       {/* Page header */}
       <div className="mb-8">
         <h2 className="font-heading font-semibold text-lg">Breach Analysis</h2>
@@ -99,14 +99,14 @@ export default function AnalysePage() {
         </p>
       </div>
 
-      <div className="flex gap-6 items-start">
+      <div className="flex flex-col md:flex-row gap-6 items-start">
 
         {/* ── LEFT — trigger + live feed ── */}
         <div className="flex-1 min-w-0 space-y-4">
 
           {/* Trigger card */}
           <div className="glass border border-border/40 rounded-xl p-6">
-            <div className="flex items-start justify-between gap-6">
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
               <div className="space-y-1">
                 <p className="text-sm font-semibold">Run Breach Check</p>
                 <p className="text-xs text-muted-foreground">
@@ -253,7 +253,7 @@ export default function AnalysePage() {
         </div>
 
         {/* ── RIGHT — run history ── */}
-        <div className="w-80 flex-shrink-0">
+        <div className="w-full md:w-80 flex-shrink-0">
           <div className="glass border border-border/40 rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Run History</p>

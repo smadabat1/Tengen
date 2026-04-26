@@ -16,7 +16,7 @@ export default function SettingsPage() {
   const { username } = useAuthStore()
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-4 md:p-6 max-w-2xl mx-auto">
       <div className="mb-8">
         <h2 className="font-heading font-semibold text-lg">Settings</h2>
         <p className="text-xs text-muted-foreground">Manage your preferences and account</p>
@@ -36,7 +36,7 @@ export default function SettingsPage() {
               )}
             >
               <Icon className="w-4 h-4" />
-              {label}
+              <span className="hidden sm:inline">{label}</span>
             </Tabs.Trigger>
           ))}
         </Tabs.List>

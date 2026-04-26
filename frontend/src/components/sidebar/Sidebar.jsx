@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import * as Dialog from '@radix-ui/react-dialog'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LogOut, ChevronUp, Vault, Notebook, ShieldCheck, Settings, Sun, Moon, ScanSearch, Wand2 } from 'lucide-react'
+import { LogOut, ChevronUp, Vault, Notebook, ShieldCheck, Settings, Sun, Moon, ScanSearch, Wand2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { vaultApi } from '@/api/vault'
 import { authApi } from '@/api/auth'
@@ -22,7 +22,7 @@ const NAV_ITEMS = [
   { path: '/settings',   icon: Settings,    label: 'Settings'  },
 ]
 
-export function Sidebar({ activeTag, onTagSelect, className }) {
+export function Sidebar({ activeTag, onTagSelect, onClose, className }) {
   const { location } = useRouterState()
 
   const { data: tagsData } = useQuery({
@@ -54,6 +54,20 @@ export function Sidebar({ activeTag, onTagSelect, className }) {
 
   return (
     <div className={cn('w-full h-full flex flex-col py-3 px-2', className)}>
+      {/* Mobile close header */}
+      {onClose && (
+        <div className="flex items-center justify-between px-1 py-1.5 mb-1 md:hidden">
+          <span className="font-heading font-semibold text-sm gradient-text tracking-wide">Tengen</span>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            aria-label="Close menu"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Top nav links */}
       <div className="space-y-0.5 mb-3 pb-3 border-b border-border/30">
         {NAV_ITEMS.map(({ path, icon: Icon, label }) => {
@@ -61,7 +75,7 @@ export function Sidebar({ activeTag, onTagSelect, className }) {
           return (
             <button
               key={path}
-              onClick={() => navigate({ to: path })}
+              onClick={() => { navigate({ to: path }); onClose?.() }}
               className={cn(
                 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
                 isActive

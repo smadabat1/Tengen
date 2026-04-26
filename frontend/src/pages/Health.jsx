@@ -126,7 +126,7 @@ export default function HealthPage() {
   }
 
   return (
-    <div className="p-6 max-w-screen-xl mx-auto">
+    <div className="p-4 md:p-6 max-w-screen-xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -159,13 +159,13 @@ export default function HealthPage() {
       </div>
 
       {/* Main 2-column layout */}
-      <div className="flex gap-5 items-start">
+      <div className="flex flex-col md:flex-row gap-5 items-start">
 
         {/* ── LEFT COLUMN ── */}
         <div className="flex-1 min-w-0 space-y-4">
 
           {/* Score gauge + radar side by side */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Radial gauge */}
             <div className="glass border border-border/40 rounded-xl p-5">
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">Overall Score</p>
@@ -225,7 +225,7 @@ export default function HealthPage() {
           </div>
 
           {/* 4 issue cards */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
             {HEALTH_CONFIG.map(({ key, icon: Icon, color, bg, border, label, desc }) => {
               const count = health?.[key] ?? 0
               const pct = total > 0 ? (count / total) * 100 : 0
@@ -281,7 +281,7 @@ export default function HealthPage() {
         </div>
 
         {/* ── RIGHT COLUMN ── */}
-        <div className="w-80 flex-shrink-0 space-y-4">
+        <div className="w-full md:w-80 flex-shrink-0 space-y-4">
 
           {/* Score history area chart */}
           <div className="glass border border-border/40 rounded-xl p-5">
