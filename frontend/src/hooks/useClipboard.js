@@ -47,7 +47,8 @@ export function useClipboard() {
         toast.dismiss(toastId)
         toast.info('Clipboard cleared')
       }, CLEAR_AFTER_MS)
-    } catch {
+    } catch (error) {
+      console.error(error);
       toast.error('Failed to copy to clipboard')
     }
   }

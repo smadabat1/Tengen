@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { toast } from 'sonner'
 
+//TODO - if it is local testing then 8000 if not change to "/api"
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 export const apiClient = axios.create({
